@@ -104,14 +104,16 @@ eight modules:
 | M1 | intake | UniProt sequence + AlphaFold DB model (or hand off to a predictor) |
 | M2 | QC | pLDDT confidence gate — flags disordered / low-confidence models |
 | M3 | receptor | trim, protonate, PDBQT prep |
-| M4 | **site** | **the key step** — find a crystallographic homolog *with a bound ligand*, superpose it onto the model, and transplant the ligand's position as the binding site |
+| M4 | **site** | **the key step** — an *ensemble* of site proposers (liganded-homolog transplant · fpocket cavities · blind DiffDock), with the known modulator's own docking adjudicating which proposed pocket is real |
 | M5 | validation | dock the known modulator; a box-contraction diagnostic converts the result into a calibrated `pose_trust` |
 | M6 | library | build a candidate set from ChEMBL (similarity + substructure + curated analogs) |
 | M7 | screen | dock the library (AutoDock Vina) |
 | M8 | prioritize | consensus rank + scaffold diversity → shortlist |
 
-M4 is what lets the tool work structure-free — but it's also the assumption most likely to
-break, which is why the status contract centers on it. See
+M4 is what lets the tool work structure-free — and rather than trust any single site-finder, it
+lets the known modulator's own docking adjudicate among several proposers, which is why the
+status contract centers on it. (The liganded-homolog transplant is one proposer of several — the
+original method, now cross-checked instead of trusted blindly.) See
 [`docs/IO_CONTRACT.md`](docs/IO_CONTRACT.md) for the full per-module contract and
 [`docs/FAILURE_MODES.md`](docs/FAILURE_MODES.md) for every degradation path.
 
@@ -136,8 +138,8 @@ python examples/demo.py                # both reference targets, cached, offline
 python examples/test_degradation.py    # the no-homolog graceful-degradation path
 ```
 Both reference runs ship as cached module outputs under `examples/`, so every claim in the
-docs is reproducible offline; a fresh live run reproduces the OPLAH homolog transplant at
-1.52 Å RMSD (7HK7/ANP).
+docs is reproducible offline; a fresh live run reproduces the OPLAH homolog proposer's transplant
+at 1.52 Å RMSD (7HK7/ANP) — one of the several proposers M4's ensemble adjudicates between.
 
 ## Retrospective validation
 Does docking-alone, no tuning, recover the one experimentally-known modulator (5-AMP) out of
@@ -165,7 +167,7 @@ induced-fit limited (`pose_trust 0.59`), so the shortlist is labelled
 
 The **activator/enhancer** framing is the motivating niche (the reference case, OPLAH +
 5-AMP, is an enhancer), but the pipeline is modulator-agnostic: it ranks *binding* to a
-homolog-anchored pocket, which is mechanism-independent. An activator anchor and an inhibitor
+modulator-adjudicated pocket, which is mechanism-independent. An activator anchor and an inhibitor
 anchor run through identical code.
 
 ## Modularity — swap one module, keep the rest
@@ -176,7 +178,7 @@ not the whole thing:
 | want to change | swap this | leave alone |
 |----------------|-----------|-------------|
 | structure source (e.g. a Boltz-2 co-fold instead of AlphaFold DB) | `modules/m1_intake.py` | M2–M8 |
-| binding-site method (e.g. add P2Rank / blind docking) | `modules/m4_site.py` + `_homolog.py` | rest |
+| binding-site proposers (ensemble already runs homolog + fpocket + DiffDock; add P2Rank, or swap one out) | `modules/m4_site.py` + `_site_ensemble.py` | rest |
 | candidate library | supply `m6/candidate_library.csv`, or edit `_library.py` | M7/M8 unchanged |
 | docking engine (e.g. smina, GNINA) | `_dock.py` | scoring/prioritization |
 | prioritization scheme | `modules/m8_prioritize.py` | screen output |
