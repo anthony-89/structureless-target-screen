@@ -1,0 +1,120 @@
+{
+  "method": "Structural superposition of ANP(AMP-PNP)-bound homolog 7HK7 chain A onto OPLAH AlphaFold model",
+  "superposition_rmsd_A": 1.59,
+  "n_core_CA": 291,
+  "homolog": "7HK7 (N-methylhydantoinase, 29% id) \u2014 ANP+Mg bound; corroborated by 7HK9 (ANP)",
+  "box_center": [
+    -25.6,
+    -7.46,
+    18.85
+  ],
+  "box_size": [
+    22.0,
+    22.0,
+    22.0
+  ],
+  "site_residues": [
+    {
+      "resnum": 13,
+      "resname": "ASP",
+      "code": "D"
+    },
+    {
+      "resnum": 14,
+      "resname": "ARG",
+      "code": "R"
+    },
+    {
+      "resnum": 15,
+      "resname": "GLY",
+      "code": "G"
+    },
+    {
+      "resnum": 16,
+      "resname": "GLY",
+      "code": "G"
+    },
+    {
+      "resnum": 17,
+      "resname": "THR",
+      "code": "T"
+    },
+    {
+      "resnum": 18,
+      "resname": "PHE",
+      "code": "F"
+    },
+    {
+      "resnum": 19,
+      "resname": "THR",
+      "code": "T"
+    },
+    {
+      "resnum": 20,
+      "resname": "ASP",
+      "code": "D"
+    },
+    {
+      "resnum": 34,
+      "resname": "LYS",
+      "code": "K"
+    },
+    {
+      "resnum": 35,
+      "resname": "LEU",
+      "code": "L"
+    },
+    {
+      "resnum": 36,
+      "resname": "LEU",
+      "code": "L"
+    },
+    {
+      "resnum": 37,
+      "resname": "SER",
+      "code": "S"
+    },
+    {
+      "resnum": 38,
+      "resname": "GLU",
+      "code": "E"
+    },
+    {
+      "resnum": 39,
+      "resname": "ASP",
+      "code": "D"
+    },
+    {
+      "resnum": 43,
+      "resname": "TYR",
+      "code": "Y"
+    },
+    {
+      "resnum": 46,
+      "resname": "ALA",
+      "code": "A"
+    },
+    {
+      "resnum": 47,
+      "resname": "PRO",
+      "code": "P"
+    },
+    {
+      "resnum": 82,
+      "resname": "THR",
+      "code": "T"
+    },
+    {
+      "resnum": 409,
+      "resname": "ILE",
+      "code": "I"
+    }
+  ],
+  "key_motifs": {
+    "P-loop_like_Gly_rich": "D13-R14-G15-G16-T17-F18-T19-D20 (phosphate-binding)",
+    "basic_phosphate": "R14, K34",
+    "aromatic_adenine_stack": "F18, Y43"
+  },
+  "rationale": "5-AMP is the adenine-monophosphate portion of ATP; this pocket binds the ATP analog ANP in the homolog, so it is the nucleotide site 5-AMP occupies.",
+  "box_note": "Focused 22 A cube on AMP-monophosphate centroid; encloses all 19 site residues (max CA-centroid 14 A). Full ATP-site box (30 A) available if triphosphate channel needed."
+}

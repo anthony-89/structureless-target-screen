@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "structure-to-screen"
+version = "0.1.0"
+description = "Agent-callable structure-to-screen pipeline for structure-free protein targets with a known small-molecule modulator."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "OPLAH pipeline team" }]
+dependencies = [
+    "requests>=2.28",
+    "numpy>=1.23",
+    "pandas>=1.5",
+    "biopython>=1.80",
+    "rdkit>=2023.3",
+    "mcp>=1.0",
+]
+
+[project.optional-dependencies]
+dock = ["meeko>=0.6", "vina>=1.2"]
+mcp = ["mcp>=1.0"]
+
+[project.scripts]
+structure-to-screen = "structure_to_screen.cli:main"
+structure-to-screen-mcp = "structure_to_screen.mcp_server:main"
+
+[tool.setuptools]
+packages = ["structure_to_screen", "structure_to_screen.modules"]

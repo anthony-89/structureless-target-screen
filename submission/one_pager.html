@@ -1,0 +1,267 @@
+<style>
+  :root{
+    --bg:#F4F3EE; --panel:#FBFAF6; --ink:#17201B; --ink-soft:#48544D; --muted:#7A867F;
+    --line:rgba(23,32,27,.12); --line-strong:rgba(23,32,27,.22);
+    --teal:#0C7A67; --teal-ink:#0A5849; --teal-bg:#E4F0EB;
+    --coral:#B0512B; --coral-ink:#8A3E20; --coral-bg:#F5E7DF;
+    --clay:#CB6a4b; --shadow:0 1px 0 rgba(23,32,27,.04);
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  @media (prefers-color-scheme:dark){:root{
+    --bg:#0C1310; --panel:#141C18; --ink:#EAF0EC; --ink-soft:#AAB8B1; --muted:#7E8C85;
+    --line:rgba(234,240,236,.13); --line-strong:rgba(234,240,236,.26);
+    --teal:#40C8A8; --teal-ink:#8FE3D0; --teal-bg:rgba(64,200,168,.13);
+    --coral:#E1834F; --coral-ink:#F0B18F; --coral-bg:rgba(225,131,79,.14);
+    --clay:#E08A66; --shadow:none;
+  }}
+  :root[data-theme="light"]{--bg:#F4F3EE;--panel:#FBFAF6;--ink:#17201B;--ink-soft:#48544D;--muted:#7A867F;--line:rgba(23,32,27,.12);--line-strong:rgba(23,32,27,.22);--teal:#0C7A67;--teal-ink:#0A5849;--teal-bg:#E4F0EB;--coral:#B0512B;--coral-ink:#8A3E20;--coral-bg:#F5E7DF;--clay:#CB6a4b;--shadow:0 1px 0 rgba(23,32,27,.04);}
+  :root[data-theme="dark"]{--bg:#0C1310;--panel:#141C18;--ink:#EAF0EC;--ink-soft:#AAB8B1;--muted:#7E8C85;--line:rgba(234,240,236,.13);--line-strong:rgba(234,240,236,.26);--teal:#40C8A8;--teal-ink:#8FE3D0;--teal-bg:rgba(64,200,168,.13);--coral:#E1834F;--coral-ink:#F0B18F;--coral-bg:rgba(225,131,79,.14);--clay:#E08A66;--shadow:none;}
+  *{box-sizing:border-box}
+  .wrap{background:var(--bg);color:var(--ink);font-family:var(--sans);
+    line-height:1.5;max-width:1120px;margin:0 auto;padding:clamp(20px,3vw,40px);
+    -webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums}
+  .brandrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.03em;border:1px solid var(--line);border-radius:999px;padding:5px 12px 5px 8px;
+    background:var(--panel);color:var(--ink-soft)}
+  .pill b{color:var(--ink);font-weight:600}
+  .spk{width:15px;height:15px;color:var(--clay);flex:none}
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  h1{font-size:clamp(26px,3.4vw,40px);line-height:1.06;font-weight:640;letter-spacing:-.02em;
+    text-wrap:balance;margin:.5rem 0 0}
+  h1 em{font-style:normal;color:var(--teal)}
+  .lede{color:var(--ink-soft);font-size:clamp(14px,1.5vw,16px);max-width:64ch;margin:.7rem 0 0}
+  .rule{height:1px;background:var(--line);border:0;margin:22px 0}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+  .chip{font-family:var(--mono);font-size:11.5px;border:1px solid var(--line);border-radius:999px;
+    padding:5px 11px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;background:var(--panel)}
+  .chip b{color:var(--teal-ink);font-weight:600}
+  .tick{color:var(--teal);font-weight:700}
+  .grid{display:grid;gap:14px}
+  .two{grid-template-columns:1fr 1fr}
+  .three{grid-template-columns:repeat(3,1fr)}
+  @media(max-width:760px){.two,.three{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;
+    padding:18px 18px 16px;box-shadow:var(--shadow)}
+  .kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:9px}
+  .band{border-radius:14px;padding:16px 18px;border:1px solid var(--line)}
+  .band.bad{background:var(--coral-bg);border-color:color-mix(in srgb,var(--coral) 30%,transparent)}
+  .band.good{background:var(--teal-bg);border-color:color-mix(in srgb,var(--teal) 32%,transparent)}
+  .band .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    display:inline-flex;align-items:center;gap:6px;font-weight:600}
+  .band.bad .tag{color:var(--coral-ink)} .band.good .tag{color:var(--teal-ink)}
+  .band p{margin:.5rem 0 0;font-size:13.5px;color:var(--ink);line-height:1.5}
+  .band small{color:var(--ink-soft)}
+  .mono{font-family:var(--mono)}
+  .data{font-family:var(--mono);font-size:12.5px;line-height:1.75;color:var(--ink);word-spacing:.04em}
+  .hl{background:var(--teal-bg);color:var(--teal-ink);border-radius:4px;padding:1px 4px;font-weight:600}
+  .metric{display:flex;gap:14px;flex-wrap:wrap;margin-top:2px}
+  .metric .m{flex:1;min-width:96px}
+  .metric .num{font-size:23px;font-weight:640;letter-spacing:-.02em;line-height:1.1}
+  .metric .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--muted);margin-top:3px}
+  .hits{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:7px}
+  .hits li{display:flex;align-items:baseline;gap:9px;font-size:13px;border-bottom:1px solid var(--line);padding-bottom:6px}
+  .hits li:last-child{border-bottom:0;padding-bottom:0}
+  .hits .name{flex:1;color:var(--ink)}
+  .hits .sc{font-family:var(--mono);font-size:12.5px;color:var(--teal-ink);font-weight:600}
+  .badge{font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;
+    border:1px solid var(--line-strong);border-radius:5px;padding:1px 5px;color:var(--muted)}
+  /* sequence ruler */
+  .seq{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px 18px 13px;margin:14px 0}
+  .seq .cap{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+  .seq svg text{font-family:var(--mono)}
+  .sq-track{fill:var(--line-strong)} .sq-band{fill:var(--teal)}
+  .sq-cap{stroke:var(--coral);stroke-width:1.5;stroke-dasharray:4 3}
+  .sq-t{fill:var(--muted)} .sq-teal{fill:var(--teal-ink);font-weight:700} .sq-coral{fill:var(--coral-ink);font-weight:700}
+  .cite{font-family:var(--mono);font-size:10.5px;color:var(--muted);line-height:1.65;margin-top:11px;
+    border-top:1px solid var(--line);padding-top:9px}
+  .cite a{color:var(--ink-soft);text-decoration:none;border-bottom:1px solid var(--line-strong)}
+  .foot{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;color:var(--muted);
+    font-family:var(--mono);font-size:11px;margin-top:6px}
+  .foot b{color:var(--ink-soft);font-weight:500}
+  svg text{font-family:var(--mono)}
+  .cv-src{fill:var(--panel);stroke:var(--line-strong)}
+  .cv-hub{fill:var(--teal)} .cv-line{stroke:var(--line-strong)}
+  .cv-t{fill:var(--ink-soft)} .cv-d{fill:var(--teal-ink);font-weight:700} .cv-hubt{fill:#fff;font-weight:700}
+  @media (prefers-color-scheme:dark){.cv-hubt{fill:#08130F}}
+  :root[data-theme="dark"] .cv-hubt{fill:#08130F} :root[data-theme="light"] .cv-hubt{fill:#fff}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="spark" viewBox="-24 -24 48 48"><g fill="currentColor">
+<rect x="-1.6" y="-21" width="3.2" height="13" rx="1.6" transform="rotate(0)"/>
+<rect x="-1.6" y="-14" width="3.2" height="7" rx="1.6" transform="rotate(30)"/>
+<rect x="-1.6" y="-21" width="3.2" height="13" rx="1.6" transform="rotate(60)"/>
+<rect x="-1.6" y="-14" width="3.2" height="7" rx="1.6" transform="rotate(90)"/>
+<rect x="-1.6" y="-21" width="3.2" height="13" rx="1.6" transform="rotate(120)"/>
+<rect x="-1.6" y="-14" width="3.2" height="7" rx="1.6" transform="rotate(150)"/>
+<rect x="-1.6" y="-21" width="3.2" height="13" rx="1.6" transform="rotate(180)"/>
+<rect x="-1.6" y="-14" width="3.2" height="7" rx="1.6" transform="rotate(210)"/>
+<rect x="-1.6" y="-21" width="3.2" height="13" rx="1.6" transform="rotate(240)"/>
+<rect x="-1.6" y="-14" width="3.2" height="7" rx="1.6" transform="rotate(270)"/>
+<rect x="-1.6" y="-21" width="3.2" height="13" rx="1.6" transform="rotate(300)"/>
+<rect x="-1.6" y="-14" width="3.2" height="7" rx="1.6" transform="rotate(330)"/>
+</g></symbol></svg>
+
+<div class="wrap">
+  <header>
+    <div class="brandrow">
+      <span class="pill"><svg class="spk"><use href="#spark"/></svg> Built with <b>Claude&nbsp;Code</b></span>
+      <span class="pill"><svg class="spk"><use href="#spark"/></svg> Research via <b>Claude&nbsp;Science</b></span>
+      <span class="pill">Life Sciences · <b>Researcher&nbsp;Track</b></span>
+    </div>
+    <h1>A structureless heart-failure target — <em>finding where its activator binds, without pre-deciding the answer.</em></h1>
+    <p class="lede">Heart failure represses OPLAH (5-oxoprolinase, UniProt O14841, 1288 aa); a screen of
+      FDA-approved compounds found 5′-AMP <b>activates</b> it — but it has no solved structure and no known
+      binding site. With Claude Code we find the site by unbiased search, then screen it for mimics and
+      better binders. A reusable pipeline for any structureless target with one known modulator.</p>
+    <div class="chips">
+      <span class="chip"><span class="tick">✓</span> Q1 <b>structure</b></span>
+      <span class="chip"><span class="tick">✓</span> Q5 <b>pockets</b></span>
+      <span class="chip"><span class="tick">✓</span> Q2 <b>AMP site</b></span>
+      <span class="chip"><span class="tick">✓</span> Q3 <b>mimics</b></span>
+      <span class="chip"><span class="tick">✓</span> Q4 <b>better binders</b></span>
+    </div>
+  </header>
+
+  <hr class="rule">
+
+  <div class="band" style="background:var(--panel);margin-bottom:14px">
+    <span class="kicker">Why this target</span>
+    <p style="margin:.3rem 0 0;font-size:13.5px;color:var(--ink);line-height:1.5">Heart failure switches OPLAH
+      <b>off</b> → the toxic metabolite <b>5-oxoproline</b> accumulates → oxidative stress damages the heart
+      (a murine model of HFpEF). So <b>activating</b> OPLAH is a therapeutic goal — and 5′-AMP, found in a
+      screen of 1280 FDA-approved compounds, is the activator identified so far. But with no structure and no
+      known site, you can't design a better one. <b>That's where this pipeline starts.</b></p>
+  </div>
+
+  <div class="grid two">
+    <div class="band bad">
+      <span class="tag">✗ The bias we removed</span>
+      <p>Copy the binding site from a <b>homolog</b> → it <b>pre-decides the answer</b>: it can only
+        confirm the guess, never discover AMP binds elsewhere.
+        <small>(Blind-docking with DiffDock caps input at 1022 residues, forcing a truncation that
+        deletes residues forming the real pocket.)</small></p>
+    </div>
+    <div class="band good">
+      <span class="tag">✓ What we did instead</span>
+      <p>Detect <b>every</b> pocket over the full structure by geometry, then <b>let AMP dock freely</b>
+        and choose its own site. The answer is now an <b>output of unbiased search</b>, not an input.</p>
+    </div>
+  </div>
+
+  <!-- sequence ruler: the pocket is built from the whole chain, so truncation breaks it -->
+  <div class="seq">
+    <div class="cap">
+      <span class="kicker" style="margin:0">One pocket, built from the whole 1288-aa chain</span>
+      <span class="mono" style="font-size:10.5px;color:var(--muted)"><span style="color:var(--teal-ink)">▬</span> pocket residues &nbsp; <span style="color:var(--coral-ink)">┊</span> DiffDock 1022 cap</span>
+    </div>
+    <svg viewBox="0 0 1000 58" width="100%" role="img" aria-label="OPLAH sequence: AMP pocket residues are spread from position 13 to 1288; DiffDock's 1022-residue cap truncates C-terminal pocket residues">
+      <rect x="782" y="17" width="198" height="22" fill="var(--coral)" opacity=".10"/>
+      <rect class="sq-track" x="20" y="25" width="960" height="6" rx="3"/>
+      <rect class="sq-band" x="29" y="23" width="17" height="10" rx="3"/>
+      <rect class="sq-band" x="252" y="23" width="7" height="10" rx="3"/>
+      <rect class="sq-band" x="384" y="23" width="23" height="10" rx="3"/>
+      <rect class="sq-band" x="538" y="23" width="6" height="10" rx="3"/>
+      <rect class="sq-band" x="973" y="23" width="8" height="10" rx="3"/>
+      <line class="sq-cap" x1="782" y1="14" x2="782" y2="43"/>
+      <text class="sq-coral" x="782" y="11" text-anchor="middle" font-size="10">1022 cap</text>
+      <text class="sq-t" x="20" y="52" font-size="10">1</text>
+      <text class="sq-t" x="980" y="52" text-anchor="end" font-size="10">1288</text>
+      <text class="sq-teal" x="37" y="52" text-anchor="middle" font-size="10">DxGGT</text>
+      <text class="sq-teal" x="256" y="52" text-anchor="middle" font-size="10">DxGGT</text>
+      <text class="sq-coral" x="977" y="52" text-anchor="end" font-size="10">C-term wall — truncated ✗</text>
+    </svg>
+    <div style="font-size:11.5px;color:var(--ink-soft);margin-top:2px">The pocket draws its walls from residues
+      <b>13 → 1288</b>. DiffDock's 1022 cap would delete the C-terminal wall — truncation isn't just risky, it
+      physically breaks this site.</div>
+    <div class="cite">Background: OPLAH is repressed in heart failure and 5-oxoproline drives cardiac oxidative
+      stress (de&nbsp;Boer et&nbsp;al., <a href="https://pubmed.ncbi.nlm.nih.gov/29118264/">Sci Transl Med 2017</a>;
+      <a href="https://academic.oup.com/cardiovascres/article-abstract/114/14/1871/5056075">Cardiovasc Res 2018</a>).
+      5′-AMP enhances OPLAH ATPase >50% in a screen of 1280 FDA-approved compounds
+      (<a href="https://academic.oup.com/eurheartj/article/44/Supplement_2/ehad655.3130/7391542">Eur Heart J 2023</a>).</div>
+  </div>
+
+  <div class="grid three">
+    <!-- convergence -->
+    <div class="card">
+      <div class="kicker">Q5 · Q2 — one pocket, three methods</div>
+      <svg viewBox="0 0 300 176" width="100%" role="img" aria-label="Three independent methods converge on one pocket">
+        <line class="cv-line" x1="70" y1="34" x2="196" y2="88" stroke-width="1.4"/>
+        <line class="cv-line" x1="70" y1="88" x2="196" y2="88" stroke-width="1.4"/>
+        <line class="cv-line" x1="70" y1="142" x2="196" y2="88" stroke-width="1.4"/>
+        <circle class="cv-hub" cx="205" cy="88" r="30"/>
+        <text class="cv-hubt" x="205" y="85" text-anchor="middle" font-size="10">AMP</text>
+        <text class="cv-hubt" x="205" y="97" text-anchor="middle" font-size="10">site</text>
+        <circle class="cv-src" cx="55" cy="34" r="15" stroke-width="1.2"/>
+        <circle class="cv-src" cx="55" cy="88" r="15" stroke-width="1.2"/>
+        <circle class="cv-src" cx="55" cy="142" r="15" stroke-width="1.2"/>
+        <text class="cv-t" x="55" y="12" text-anchor="middle" font-size="9.5">P2Rank</text>
+        <text class="cv-t" x="55" y="169" text-anchor="middle" font-size="9.5">fpocket</text>
+        <text class="cv-t" x="26" y="91" text-anchor="middle" font-size="9.5" transform="rotate(-90 26 91)">blind dock</text>
+        <text class="cv-d" x="132" y="52" text-anchor="middle" font-size="10">0.98</text>
+        <text class="cv-d" x="130" y="82" text-anchor="middle" font-size="10">1.8 Å</text>
+        <text class="cv-d" x="132" y="128" text-anchor="middle" font-size="10">2.2 Å</text>
+      </svg>
+      <p style="font-size:12.5px;color:var(--ink-soft);margin:.4rem 0 0">P2Rank probability <b>0.98</b>
+        — detection score <b>5× the next</b> of 21 pockets; fpocket agrees within <b>1.8 Å</b>; AMP docked blind lands
+        <b>2.2 Å</b> away — same cavity.</p>
+    </div>
+
+    <!-- AMP site -->
+    <div class="card">
+      <div class="kicker">Q2 — AMP's site, on its own terms</div>
+      <div class="metric" style="margin-bottom:10px">
+        <div class="m"><div class="num">−8.78</div><div class="lbl">kcal/mol best</div></div>
+        <div class="m"><div class="num">17</div><div class="lbl">contact residues</div></div>
+      </div>
+      <div class="data">
+        <span class="hl">D</span>13 <span class="hl">G</span>15 <span class="hl">G</span>16
+        <span class="hl">T</span>17 F18 D20 K34<br>
+        <span class="hl">D</span>314 <span class="hl">G</span>316 <span class="hl">G</span>317
+        <span class="hl">T</span>318 S319<br>
+        G489 G490 G515 S518 A519
+      </div>
+      <p style="font-size:12px;color:var(--ink-soft);margin:.6rem 0 0">A phosphate-binding cleft with the
+        loop motif <span class="mono hl">D-x-G-G-T</span> repeated twice — OPLAH's two nucleotide domains.</p>
+    </div>
+
+    <!-- screen -->
+    <div class="card">
+      <div class="kicker">Q3 · Q4 — two-arm virtual screen</div>
+      <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px">Mimics (nucleotide arm)</div>
+      <ul class="hits">
+        <li><span class="name">dGMP <span class="badge">85% overlap</span></span><span class="sc">−9.14</span></li>
+        <li><span class="name">entecavir <span class="badge">HBV drug</span></span><span class="sc">−8.78</span></li>
+        <li><span class="name">sofosbuvir <span class="badge">HCV drug</span></span><span class="sc">−9.70</span></li>
+      </ul>
+      <div style="font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:12px 0 5px">Novel binders (diverse ZINC)</div>
+      <ul class="hits">
+        <li><span class="name">ZINC4126706 <span class="badge">novel · sim 0.06</span></span><span class="sc">−10.81</span></li>
+        <li><span class="name">775 of 5,000 beat AMP <span class="badge">379 novel</span></span><span class="sc">10%</span></li>
+      </ul>
+      <p style="font-size:11.5px;color:var(--ink-soft);margin:.6rem 0 0">Diverse hits out-score AMP and are far
+        more drug-like: median <b>QED 0.75</b> vs AMP's <b>0.39</b>. <span style="color:var(--muted)">Scores rank
+        hypotheses to test, not measured affinities (~1–2 kcal/mol noise).</span></p>
+    </div>
+  </div>
+
+  <div style="height:14px"></div>
+  <div class="band good">
+    <span class="tag">→ Beyond OPLAH</span>
+    <p>The method assumes nothing about the target, so it generalizes: hand it <b>any</b> protein
+      with no structure and one known modulator, and it returns a testable shortlist — the pattern
+      behind most hard drug targets. OPLAH is the first case; the pocket-detection step folds back
+      into the pipeline (module M4), driven end-to-end by <b>Claude Code</b>.</p>
+  </div>
+
+  <hr class="rule">
+  <div class="foot">
+    <span class="pill" style="padding:4px 11px 4px 8px"><svg class="spk" style="width:13px;height:13px"><use href="#spark"/></svg> Built with <b>Claude Code</b></span>
+    <span><b>Reproducible</b> from one environment file</span>
+    <span><b>Open source</b> · MIT</span>
+    <span>AlphaFold · P2Rank · fpocket · AutoDock&nbsp;Vina · RDKit · ChEMBL · ZINC20</span>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+{
+  "top_affinity_kcal_mol": -8.43,
+  "pose_overlap_frac_within_3A": 0.0,
+  "max_contact_jaccard": 0.41,
+  "centroid_offset_A": 9.92,
+  "verdict_note": "PARTIAL \u2014 5-AMP docks with strong affinity (top -8.43 kcal/mol) into the correct nucleotide-binding region and consistently contacts key site residues (Gly-rich phosphate loop G15/G16/T17, basic K34, ",
+  "recoverability_score": 0.78,
+  "diagnostic_verdict": "induced_fit_limited",
+  "affinity_at_closest_approach_kcal_mol": 3.79,
+  "closest_approach_A": 4.19,
+  "diagnostic": "box_contraction_sweep",
+  "diagnostic_note": "Forcing 5-AMP onto the reference position collapses affinity (+3.8 kcal/mol clash at 4.2 A). Pocket is correctly localized; exact holo pose needs receptor flexibility (apo AlphaFold limitation). Orthogonal check: co-folding (Boltz-2)."
+}

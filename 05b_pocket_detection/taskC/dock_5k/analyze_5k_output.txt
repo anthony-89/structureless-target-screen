@@ -1,0 +1,31 @@
+docked (usable): 4998 of 4999   AMP control: -8.78 kcal/mol
+beat AMP: 775  (enrichment 396 | diversity 379)
+
+Top 15 overall:
+   1.      4126706  -10.81  diversity   sim=0.056
+   2.   2382403409  -10.60  diversity   sim=0.111
+   3.   1857714551  -10.52  enrichment  sim=0.144
+   4.   1287289516  -10.50  diversity   sim=0.093
+   5.   2383336130  -10.47  diversity   sim=0.096
+   6.     91625978  -10.34  diversity   sim=0.079
+   7.   2384434877  -10.31  diversity   sim=0.087
+   8.   1940195618  -10.30  diversity   sim=0.112
+   9.   1857718293  -10.29  enrichment  sim=0.135
+  10.   2100556148  -10.25  diversity   sim=0.122
+  11.   1857697096  -10.19  diversity   sim=0.097
+  12.     65151614  -10.16  diversity   sim=0.106
+  13.   2325810125  -10.13  diversity   sim=0.090
+  14.   2382386609  -10.11  enrichment  sim=0.138
+  15.   2383347452  -10.09  diversity   sim=0.068
+
+Top 8 from the DIVERSITY arm (novel, low AMP-similarity — the #4 story):
+   1.      4126706  -10.81  sim=0.056  O=C1Nc2ccccc2C12OCC1(CO2)COC2(OC1)C(=O)Nc1ccccc1
+   2.   2382403409  -10.60  sim=0.111  Cn1ccnc1[C@@H]1N(C(=O)c2cccn3cnnc23)CC[C@]12C(=O
+   3.   1287289516  -10.50  sim=0.093  CCCc1cc(=O)n2[nH]c(NC(=O)c3ccc4c(c3)N(C)C(=O)CO4
+   4.   2383336130  -10.47  sim=0.096  O=c1c(CN2C[C@@H]3C[C@H](C2)c2cccc(=O)n2[C@H]3CO)
+   5.     91625978  -10.34  sim=0.079  O=c1[nH]cc(CCn2cc(-c3cc(=O)c4ccccc4[nH]3)nn2)c(=
+   6.   2384434877  -10.31  sim=0.087  N=c1nc2[nH][nH]cc-2c(=N[C@H]2CC[C@@H](C(=O)NCc3c
+   7.   1940195618  -10.30  sim=0.112  NC(=O)[C@H]1CC[C@H]2OCCN(C(=O)c3cc(=O)n(-c4ccccc
+   8.   2100556148  -10.25  sim=0.122  N=c1cc(C(=O)N[C@@H]2C[C@H](C(=O)N3CCC4(CCCO4)CC3
+
+-> /Users/antonioesquivel/Desktop/claude_code_handoff/05b_pocket_detection/taskC/dock_5k/shortlist_5k.csv

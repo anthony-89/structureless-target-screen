@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+s2s_runs/
+s2s_run/
+*.egg-info/
+# Confidential validation asset — experimental FDA library, do NOT commit
+validation_fda/
+*library_cas*
+*_smiles*.tsv
+validation/

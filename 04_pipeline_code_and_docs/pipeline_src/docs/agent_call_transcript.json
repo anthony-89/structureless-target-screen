@@ -1,0 +1,154 @@
+[
+  {
+    "call": "check_status(run_id='oplah_5amp')",
+    "returned": {
+      "found": true,
+      "run_id": "oplah_5amp",
+      "overall_status": "low_confidence",
+      "reached_module": "M8_prioritize",
+      "modules": [
+        {
+          "module": "M1_intake",
+          "status": "ok",
+          "confidence": null,
+          "reason": "cached: O14841 (1288 aa)"
+        },
+        {
+          "module": "M2_qc",
+          "status": "ok",
+          "confidence": 0.939,
+          "reason": "mean pLDDT 87.9, 94% of residues confident"
+        },
+        {
+          "module": "M3_receptor",
+          "status": "ok",
+          "confidence": null,
+          "reason": "cached receptor (11494 atoms)"
+        },
+        {
+          "module": "M4_site",
+          "status": "ok",
+          "confidence": 0.94,
+          "reason": "cached site: liganded_homolog_transplant (RMSD 1.59 A)"
+        },
+        {
+          "module": "M5_validate",
+          "status": "low_confidence",
+          "confidence": 0.41,
+          "reason": "cached: anchor engages pocket (Jaccard 0.41) but is spatially shifted (overlap 0.00); pose_trust 0.41. Scores are comparative-within-box."
+        },
+        {
+          "module": "M6_library",
+          "status": "ok",
+          "confidence": null,
+          "reason": "cached library (73 compounds)"
+        },
+        {
+          "module": "M7_screen",
+          "status": "ok",
+          "confidence": null,
+          "reason": "cached screen (73 docked)"
+        },
+        {
+          "module": "M8_prioritize",
+          "status": "low_confidence",
+          "confidence": null,
+          "reason": "15-compound shortlist; 11 beat the anchor (comparative-within-box; anchor pose was shifted, see M5)"
+        }
+      ]
+    }
+  },
+  {
+    "call": "get_shortlist(run_id='oplah_5amp', top_n=3)",
+    "returned": {
+      "available": true,
+      "run_id": "oplah_5amp",
+      "status": "low_confidence",
+      "interpretation": "comparative-within-box",
+      "n_beat_anchor": 11,
+      "note": "15-compound shortlist; 11 beat the anchor (comparative-within-box; anchor pose was shifted, see M5)",
+      "shortlist": [
+        {
+          "lig_id": "L055",
+          "affinity_kcal_mol": "-9.166",
+          "ligand_efficiency": "0.339",
+          "pref_name": "",
+          "chembl_id": "CHEMBL18238",
+          "mw": "371.4",
+          "murcko": ""
+        },
+        {
+          "lig_id": "L035",
+          "affinity_kcal_mol": "-9.1",
+          "ligand_efficiency": "0.396",
+          "pref_name": "",
+          "chembl_id": "CHEMBL9701",
+          "mw": "343.2",
+          "murcko": ""
+        },
+        {
+          "lig_id": "L056",
+          "affinity_kcal_mol": "-8.949",
+          "ligand_efficiency": "0.309",
+          "pref_name": "",
+          "chembl_id": "CHEMBL17857",
+          "mw": "508.3",
+          "murcko": ""
+        }
+      ]
+    }
+  },
+  {
+    "call": "check_status(run_id='degradation_test')",
+    "returned": {
+      "found": true,
+      "run_id": "degradation_test",
+      "overall_status": "unscreenable",
+      "reached_module": "M4_site",
+      "modules": [
+        {
+          "module": "M1_intake",
+          "status": "ok",
+          "confidence": null,
+          "reason": "cached: O14841 (1288 aa)"
+        },
+        {
+          "module": "M2_qc",
+          "status": "ok",
+          "confidence": 0.939,
+          "reason": "mean pLDDT 87.9, 94% of residues confident"
+        },
+        {
+          "module": "M3_receptor",
+          "status": "ok",
+          "confidence": null,
+          "reason": "cached receptor (11494 atoms)"
+        },
+        {
+          "module": "M4_site",
+          "status": "unscreenable",
+          "confidence": null,
+          "reason": "no liganded homolog found in PDB; cannot localize the modulator pocket by transplant"
+        }
+      ]
+    }
+  },
+  {
+    "call": "get_shortlist(run_id='degradation_test')",
+    "returned": {
+      "available": false,
+      "run_id": "degradation_test",
+      "overall_status": "unscreenable",
+      "reached_module": "M4_site",
+      "reason": "run stopped at M4_site before prioritization; overall status unscreenable"
+    }
+  },
+  {
+    "call": "check_status(run_id='does_not_exist')",
+    "returned": {
+      "found": false,
+      "run_id": "does_not_exist",
+      "reason": "no run named 'does_not_exist' \u2014 call run_full_pipeline first"
+    }
+  }
+]

@@ -1,0 +1,287 @@
+{
+  "target": "O14841",
+  "modulator": "5-AMP",
+  "started_at": 1783449407.827729,
+  "overall_status": "low_confidence",
+  "n_modules_run": 8,
+  "reached_module": "M8_prioritize",
+  "results": [
+    {
+      "module": "M1_intake",
+      "status": "ok",
+      "reason": "cached: O14841 (1288 aa)",
+      "confidence": null,
+      "data": {
+        "accession": "O14841",
+        "seq_len": 1288,
+        "af_entry": "AF-O14841-F1",
+        "af_version": 6,
+        "modulator": "5-AMP",
+        "modulator_mode": "activator"
+      },
+      "artifacts": [
+        "s2s_runs/oplah_5amp/m1/O14841.fasta",
+        "s2s_runs/oplah_5amp/m1/O14841_af.cif"
+      ],
+      "metrics": {},
+      "elapsed_s": 0.0
+    },
+    {
+      "module": "M2_qc",
+      "status": "ok",
+      "reason": "mean pLDDT 87.9, 94% of residues confident",
+      "confidence": 0.939,
+      "data": {
+        "mean_plddt": 87.89,
+        "frac_ge_70": 0.939,
+        "n_residues": 1288,
+        "min": 29.22
+      },
+      "artifacts": [
+        "s2s_runs/oplah_5amp/m2/qc.json"
+      ],
+      "metrics": {
+        "mean_plddt": 87.89,
+        "frac_ge_70": 0.939,
+        "n_residues": 1288,
+        "min": 29.22
+      },
+      "elapsed_s": 0.01
+    },
+    {
+      "module": "M3_receptor",
+      "status": "ok",
+      "reason": "cached receptor (11494 atoms)",
+      "confidence": null,
+      "data": {
+        "pdbqt_atoms": 11494
+      },
+      "artifacts": [
+        "s2s_runs/oplah_5amp/m3/receptor.pdbqt",
+        "s2s_runs/oplah_5amp/m3/receptor.pdb"
+      ],
+      "metrics": {},
+      "elapsed_s": 0.0
+    },
+    {
+      "module": "M4_site",
+      "status": "ok",
+      "reason": "cached site: liganded_homolog_transplant (RMSD 1.59 A)",
+      "confidence": 0.94,
+      "data": {
+        "method": "liganded_homolog_transplant",
+        "superposition_rmsd_A": 1.59,
+        "n_core_CA": 291,
+        "homolog": "7HK7",
+        "box_center": [
+          -25.6,
+          -7.46,
+          18.85
+        ],
+        "box_size": [
+          22.0,
+          22.0,
+          22.0
+        ],
+        "site_residues": [
+          {
+            "resnum": 13,
+            "resname": "ASP",
+            "code": "D"
+          },
+          {
+            "resnum": 14,
+            "resname": "ARG",
+            "code": "R"
+          },
+          {
+            "resnum": 15,
+            "resname": "GLY",
+            "code": "G"
+          },
+          {
+            "resnum": 16,
+            "resname": "GLY",
+            "code": "G"
+          },
+          {
+            "resnum": 17,
+            "resname": "THR",
+            "code": "T"
+          },
+          {
+            "resnum": 18,
+            "resname": "PHE",
+            "code": "F"
+          },
+          {
+            "resnum": 19,
+            "resname": "THR",
+            "code": "T"
+          },
+          {
+            "resnum": 20,
+            "resname": "ASP",
+            "code": "D"
+          },
+          {
+            "resnum": 34,
+            "resname": "LYS",
+            "code": "K"
+          },
+          {
+            "resnum": 35,
+            "resname": "LEU",
+            "code": "L"
+          },
+          {
+            "resnum": 36,
+            "resname": "LEU",
+            "code": "L"
+          },
+          {
+            "resnum": 37,
+            "resname": "SER",
+            "code": "S"
+          },
+          {
+            "resnum": 38,
+            "resname": "GLU",
+            "code": "E"
+          },
+          {
+            "resnum": 39,
+            "resname": "ASP",
+            "code": "D"
+          },
+          {
+            "resnum": 43,
+            "resname": "TYR",
+            "code": "Y"
+          },
+          {
+            "resnum": 46,
+            "resname": "ALA",
+            "code": "A"
+          },
+          {
+            "resnum": 47,
+            "resname": "PRO",
+            "code": "P"
+          },
+          {
+            "resnum": 82,
+            "resname": "THR",
+            "code": "T"
+          },
+          {
+            "resnum": 409,
+            "resname": "ILE",
+            "code": "I"
+          }
+        ],
+        "key_motifs": {
+          "P-loop_like_Gly_rich": "D13-R14-G15-G16-T17-F18-T19-D20 (phosphate-binding)",
+          "basic_phosphate": "R14, K34",
+          "aromatic_adenine_stack": "F18, Y43"
+        },
+        "rationale": "5-AMP is the adenine-monophosphate portion of ATP; this pocket binds the ATP analog ANP in the homolog, so it is the nucleotide site 5-AMP occupies.",
+        "box_note": "Focused 22 A cube on AMP-monophosphate centroid; encloses all 19 site residues (max CA-centroid 14 A). Full ATP-site box (30 A) available if triphosphate channel needed.",
+        "status": "ok",
+        "homolog_identity": 0.29,
+        "homolog_ligand": "ANP",
+        "confidence": 0.94,
+        "pocket_source": "homolog_transplant"
+      },
+      "artifacts": [
+        "s2s_runs/oplah_5amp/m4/binding_site.json"
+      ],
+      "metrics": {},
+      "elapsed_s": 0.0
+    },
+    {
+      "module": "M5_validate",
+      "status": "low_confidence",
+      "reason": "cached: anchor engages pocket (Jaccard 0.41) but is spatially shifted (overlap 0.00); pose_trust 0.59. Scores are comparative-within-box.",
+      "confidence": 0.59,
+      "data": {
+        "top_affinity_kcal_mol": -8.43,
+        "pose_overlap_frac_within_3A": 0.0,
+        "max_contact_jaccard": 0.41,
+        "centroid_offset_A": 9.92,
+        "verdict_note": "PARTIAL \u2014 5-AMP docks with strong affinity (top -8.43 kcal/mol) into the correct nucleotide-binding region and consistently contacts key site residues (Gly-rich phosphate loop G15/G16/T17, basic K34, ",
+        "recoverability_score": 0.78,
+        "diagnostic_verdict": "induced_fit_limited",
+        "affinity_at_closest_approach_kcal_mol": 3.79,
+        "closest_approach_A": 4.19,
+        "diagnostic": "box_contraction_sweep",
+        "diagnostic_note": "Forcing 5-AMP onto the reference position collapses affinity (+3.8 kcal/mol clash at 4.2 A). Pocket is correctly localized; exact holo pose needs receptor flexibility (apo AlphaFold limitation). Orthogonal check: co-folding (Boltz-2).",
+        "pose_trust": 0.59,
+        "screen_benchmark_kcal_mol": -8.43
+      },
+      "artifacts": [
+        "s2s_runs/oplah_5amp/m5/validation.json"
+      ],
+      "metrics": {
+        "top_affinity_kcal_mol": -8.43,
+        "pose_overlap_frac_within_3A": 0.0,
+        "max_contact_jaccard": 0.41,
+        "centroid_offset_A": 9.92,
+        "verdict_note": "PARTIAL \u2014 5-AMP docks with strong affinity (top -8.43 kcal/mol) into the correct nucleotide-binding region and consistently contacts key site residues (Gly-rich phosphate loop G15/G16/T17, basic K34, ",
+        "recoverability_score": 0.78,
+        "diagnostic_verdict": "induced_fit_limited",
+        "affinity_at_closest_approach_kcal_mol": 3.79,
+        "closest_approach_A": 4.19,
+        "diagnostic": "box_contraction_sweep",
+        "diagnostic_note": "Forcing 5-AMP onto the reference position collapses affinity (+3.8 kcal/mol clash at 4.2 A). Pocket is correctly localized; exact holo pose needs receptor flexibility (apo AlphaFold limitation). Orthogonal check: co-folding (Boltz-2).",
+        "pose_trust": 0.59,
+        "screen_benchmark_kcal_mol": -8.43
+      },
+      "elapsed_s": 0.0
+    },
+    {
+      "module": "M6_library",
+      "status": "ok",
+      "reason": "cached library (73 compounds)",
+      "confidence": null,
+      "data": {
+        "n_compounds": 73
+      },
+      "artifacts": [
+        "s2s_runs/oplah_5amp/m6/candidate_library.csv"
+      ],
+      "metrics": {},
+      "elapsed_s": 0.0
+    },
+    {
+      "module": "M7_screen",
+      "status": "ok",
+      "reason": "cached screen (73 docked)",
+      "confidence": null,
+      "data": {
+        "n_docked": 73
+      },
+      "artifacts": [
+        "s2s_runs/oplah_5amp/m7/docking_scores.csv"
+      ],
+      "metrics": {},
+      "elapsed_s": 0.0
+    },
+    {
+      "module": "M8_prioritize",
+      "status": "low_confidence",
+      "reason": "cached shortlist (15 compounds) \u2014 comparative-within-box (see M5)",
+      "confidence": null,
+      "data": {
+        "shortlist_n": 15,
+        "n_beat_anchor": 11,
+        "interpretation": "comparative-within-box"
+      },
+      "artifacts": [
+        "s2s_runs/oplah_5amp/m8/shortlist.csv"
+      ],
+      "metrics": {},
+      "elapsed_s": 0.0
+    }
+  ]
+}

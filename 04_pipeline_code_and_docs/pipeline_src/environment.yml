@@ -1,0 +1,21 @@
+# Reproducible environment for structure-to-screen.
+# The heavy screening path needs AutoDock Vina + Open Babel, which are cleanest via
+# conda-forge/bioconda. Pure-Python users who only need M1/M2/M4/M8 (intake, QC,
+# homolog transplant, prioritization) can `pip install -e .` without this.
+name: structure-to-screen
+channels: [conda-forge, bioconda]
+dependencies:
+  - python=3.11
+  - rdkit=2025.9
+  - openbabel=3.1
+  - vina=1.2.7
+  - numpy=1.26
+  - pandas
+  - scipy
+  - requests
+  - pip
+  - pip:
+      - meeko==0.7.1
+      - biopython==1.87
+      - mcp>=1.0
+      - -e .

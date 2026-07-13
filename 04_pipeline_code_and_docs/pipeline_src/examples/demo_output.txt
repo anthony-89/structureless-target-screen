@@ -1,0 +1,65 @@
+
+########################################################################
+#  structure-to-screen — agent-callable pipeline for structure-free targets
+#  with a known modulator.  Two targets, two honest outcomes.
+########################################################################
+
+========================================================================
+  TARGET 1 — OPLAH (O14841) + 5-AMP  [the enhancer niche]
+========================================================================
+  Structure-free workflow: AlphaFold model -> liganded-homolog pocket ->
+  validate the known modulator -> screen -> prioritize.
+
+  overall_status : LOW_CONFIDENCE   (reached M8_prioritize)
+    M1_intake      ok               cached: O14841 (1288 aa)
+    M2_qc          ok              conf=0.94  mean pLDDT 87.9, 94% of residues confident
+    M3_receptor    ok               cached receptor (11494 atoms)
+    M4_site        ok              conf=0.94  cached site: liganded_homolog_transplant (RMSD 1.59 A)
+    M5_validate    low_confidence  conf=0.59  cached: anchor engages pocket (Jaccard 0.41) but is spatially shif
+    M6_library     ok               cached library (73 compounds)
+    M7_screen      ok               cached screen (73 docked)
+    M8_prioritize  low_confidence   cached shortlist (15 compounds) — comparative-within-box (see M5)
+
+  agent calls get_shortlist('oplah_5amp', top_n=5):
+    available=True  status=low_confidence  interpretation='comparative-within-box'
+    11 compounds beat the 5-AMP anchor (comparative-within-box)
+    lig      affinity      LE   name
+    L055       -9.166   0.339   CHEMBL18238
+    L035         -9.1   0.396   CHEMBL9701
+    L056       -8.949   0.309   CHEMBL17857
+    L065        -8.92   0.255   CHEMBL20503
+    L052       -8.887   0.329   CHEMBL278932
+
+  --> Delivered a ranked shortlist, HONESTLY labeled: the scores rank
+      compounds within the box; the anchor pose is induced-fit limited
+      (pose_trust 0.59), so this is a hypothesis generator, not a verdict.
+
+========================================================================
+  TARGET 2 — c-Myc (P01106) + 10058-F4  [deliberate stress test]
+========================================================================
+  Intrinsically disordered 'undruggable' oncoprotein. We EXPECT this to fail —
+  the point is that it fails HONESTLY and says why.
+
+  overall_status : UNSCREENABLE   (reached M4_site)
+    M1_intake      ok               cached: P01106 (454 aa)
+    M2_qc          low_confidence  conf=0.23  mean pLDDT 60.4 < 70: model confidence marginal; docking results c
+    M3_receptor    ok               prepared receptor (4382 atoms)
+    M4_site        unscreenable     superposition RMSD 39.5 A exceeds 4.0 A: a liganded homolog (8OTS)
+
+  agent calls get_shortlist('myc'):
+    available=False
+    reason: run stopped at M4_site before prioritization; overall status unscreenable
+
+  --> NO shortlist fabricated. The tool found a liganded homolog (8OTS) but
+      refused to trust a 39.5 A superposition, and returned next_actions
+      (blind docking / domain restriction) for the agent to try instead.
+
+========================================================================
+  THE POINT
+========================================================================
+  Same pipeline, same status contract, two very different targets:
+    * a shortlist you can trust to be honestly caveated, and
+    * a refusal you can trust to be correct.
+  Every module returns ok / low_confidence / unscreenable — an agent branches
+  on the status, never on prose. That is what makes it callable.
+

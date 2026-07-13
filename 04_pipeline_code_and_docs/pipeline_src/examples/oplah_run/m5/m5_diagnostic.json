@@ -1,0 +1,66 @@
+{
+  "diagnostic": "box_contraction_sweep",
+  "question": "Is the ~10 A anchor offset a rigid-receptor artifact or a pocket-definition error?",
+  "sweep": [
+    {
+      "box": 24,
+      "top_aff": -8.768,
+      "top_disp": 10.31,
+      "min_disp": 9.82,
+      "closest_pose_aff": -7.451,
+      "best_overlap": 0.0,
+      "n_poses": 12
+    },
+    {
+      "box": 20,
+      "top_aff": -8.028,
+      "top_disp": 10.36,
+      "min_disp": 5.97,
+      "closest_pose_aff": -6.543,
+      "best_overlap": 0.43,
+      "n_poses": 12
+    },
+    {
+      "box": 16,
+      "top_aff": -5.997,
+      "top_disp": 5.75,
+      "min_disp": 5.57,
+      "closest_pose_aff": -5.292,
+      "best_overlap": 0.57,
+      "n_poses": 12
+    },
+    {
+      "box": 12,
+      "top_aff": -3.708,
+      "top_disp": 5.29,
+      "min_disp": 4.48,
+      "closest_pose_aff": -1.41,
+      "best_overlap": 0.52,
+      "n_poses": 5
+    },
+    {
+      "box": 10,
+      "top_aff": 3.794,
+      "top_disp": 4.19,
+      "min_disp": 4.19,
+      "closest_pose_aff": 3.794,
+      "best_overlap": 0.48,
+      "n_poses": 1
+    }
+  ],
+  "reference_centroid": [
+    -25.63,
+    -7.49,
+    18.92
+  ],
+  "finding": "Forcing 5-AMP toward the reference nucleotide position by contracting the box collapses affinity monotonically (-8.8 -> -6.0 -> -3.7 -> +3.8 kcal/mol) and turns positive (steric clash) at 10 A. The apo rigid receptor cannot accommodate the ligand at the exact crystallographic position.",
+  "interpretation": "Pocket is correctly localized (5-AMP docks well ~10 A away, same Gly-loop/K34/F18 region), but the exact holo nucleotide pose requires receptor flexibility the apo AlphaFold model does not provide. This is an induced-fit / apo-conformation limitation, NOT a site-definition error.",
+  "verdict": "induced_fit_limited",
+  "best_affinity_near_reference_kcal_mol": -6.54,
+  "recoverability_score": 0.78,
+  "geometric_agreement_score": 0.41,
+  "pose_trust": 0.59,
+  "recommended_orthogonal_check": "co-folding (Boltz-2) or flexible-loop docking to recover the holo pose",
+  "affinity_at_closest_approach_kcal_mol": 3.79,
+  "closest_approach_A": 4.19
+}

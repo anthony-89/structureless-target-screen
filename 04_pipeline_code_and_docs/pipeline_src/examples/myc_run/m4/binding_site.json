@@ -1,0 +1,27 @@
+{
+  "method": "liganded_homolog_transplant",
+  "homolog": "8OTS",
+  "homolog_identity": 1.0,
+  "homolog_ligand": "PTD",
+  "superposition_rmsd_A": 39.48,
+  "box_center": [
+    -10.83,
+    -6.91,
+    -1.91
+  ],
+  "box_size": [
+    22.0,
+    22.0,
+    22.0
+  ],
+  "site_residues": [],
+  "pocket_source": "homolog_untrustworthy",
+  "status": "unscreenable",
+  "reason": "superposition RMSD 39.5 A exceeds 4.0 A: a liganded homolog (8OTS) exists but its fold cannot be aligned to the model (likely a flexible/disordered target or a domain-only crystal form)",
+  "next_actions": [
+    "check_model_pLDDT_for_disorder",
+    "restrict_to_folded_domain",
+    "blind_docking_diffdock_l",
+    "manual_site_from_literature"
+  ]
+}

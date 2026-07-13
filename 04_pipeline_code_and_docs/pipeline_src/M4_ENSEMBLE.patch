@@ -1,0 +1,455 @@
+--- a/structure_to_screen/config.py	2026-07-07 19:52:11
++++ b/structure_to_screen/config.py	2026-07-10 19:58:07
+@@ -25,6 +25,25 @@
+     homolog_evalue_cutoff: float = 1.0    # M4: RCSB search e-value ceiling
+     site_rmsd_ok: float = 2.5             # M4: superposition RMSD (A) for 'ok'
+     site_rmsd_low: float = 4.0            # M4: above this -> unscreenable
++
++    # --- M4 ensemble site selection (modulator adjudicates between proposers) ---
++    # Which site proposers to run, in order. A proposer whose tool is unavailable
++    # contributes nothing (listed under proposers_failed) rather than failing the run.
++    site_proposers: tuple[str, ...] = ("homolog", "fpocket", "diffdock")
++    fpocket_bin: str = "fpocket"          # fpocket binary on PATH
++    fpocket_top_k: int = 3                # keep the top-K pockets by DRUGGABILITY
++    # DiffDock proposer. By default M4 only *reads* a completed blind dock (a ~1 h CPU job
++    # is a poor fit for an inline module). Point diffdock_poses_dir at rankN_confidence*.sdf,
++    # OR set diffdock_run=True + diffdock_repo to let M4 launch DiffDock itself, cache the
++    # poses under m4/diffdock/<complex>/, and reuse them on resume.
++    diffdock_poses_dir: str | None = None # explicit dir of a completed blind dock
++    diffdock_run: bool = False            # opt in to launching DiffDock from M4
++    diffdock_repo: str | None = None      # path to a DiffDock checkout (has inference.py)
++    diffdock_python: str | None = None    # python for that env (default: current interpreter)
++    diffdock_samples: int = 40            # samples_per_complex for the blind dock
++    consensus_radius_A: float = 8.0       # two proposers "agree" if centers within this
++    site_select_coverage_ok: float = 0.6  # winner engages 'well' if this frac of modulator contacts are in-pocket
++    site_select_affinity_ok: float = -6.0 # ...and at least this modulator affinity (kcal/mol)
+     # M5: reference-pose recovery. Fraction of anchor atoms within tol of the
+     # transplanted reference; below low -> low_confidence pose (not a hard fail).
+     pose_overlap_ok: float = 0.30
+--- a/structure_to_screen/modules/m4_site.py	2026-07-07 20:14:08
++++ b/structure_to_screen/modules/m4_site.py	2026-07-10 19:31:42
+@@ -1,30 +1,51 @@
+-"""M4 — Binding-site definition by liganded-homolog transplant.
++"""M4 — Binding-site definition by an ENSEMBLE of site proposers, adjudicated by the modulator.
+ 
+-This is the pipeline's distinguishing method and its most important honest
+-failure mode. We search the PDB for a homolog of the target that was
+-crystallized WITH a ligand of the modulator's chemotype, superpose it onto the
+-model, and transplant the ligand to localize the pocket.
++The pipeline's distinguishing idea is that we have a *known modulator*, so we do not
++have to trust any single site-finder. M4 runs several independent proposers and lets
++the modulator's own docking decide which proposed pocket is real:
+ 
++  proposers (each pluggable; any may return nothing):
++    * homolog   — liganded-homolog transplant (the original method). Search the PDB for
++                  a homolog crystallised WITH a ligand of the modulator's chemotype,
++                  superpose, transplant the ligand centroid to localise the pocket.
++    * fpocket   — ligand-free geometric cavity detection, ranked by DRUGGABILITY.
++    * diffdock  — blind DiffDock dock of the modulator; its top pose localises the site.
++
++  adjudication — dock the modulator into each candidate box and keep the one it engages
++  best (contact-Jaccard + affinity + cross-method consensus). Runner-up sites are
++  reported with a viable/rejected flag, never silently dropped.
++
+ Graceful degradation (the agent-facing contract):
+-  - homolog found, good superposition  -> ok, box defined
+-  - homolog found, marginal RMSD        -> low_confidence, box defined with caveat
+-  - NO liganded homolog found           -> unscreenable, {"pocket_source":"none_found",
+-                                           "fallback_attempted": "..."}  (NOT a silent fallback)
++  - modulator engages a candidate well, ≥2 methods agree  -> ok
++  - modulator engages, but weakly / only one method        -> low_confidence  (+caveat)
++  - no proposer yields a box the modulator binds in        -> unscreenable
++                                                              {"pocket_source":"none_found", ...}
++
++This is an *open* ensemble, not a silent fallback: every proposer that ran, and every
++runner-up, is recorded in binding_site.json. The output stays backward-compatible —
++box_center / box_size / site_residues are exactly what M5 and M7 already read.
++
++Which proposers run is controlled by cfg.site_proposers (default: all three). A proposer
++whose tool is unavailable (no fpocket binary, no DiffDock poses) simply contributes
++nothing and is listed under `proposers_failed`, so on a homolog-only machine M4 reduces
++to the original single-method behaviour — now validated by the modulator's own dock.
+ """
+ from __future__ import annotations
+ import json
+ from ..config import PipelineConfig
+ from ..status import ModuleResult, ok, low_confidence, unscreenable
++from .. import _site_ensemble as ens
+ 
+ 
+ def run(cfg: PipelineConfig, receptor_pdb: str) -> ModuleResult:
+     site_path = cfg.path("m4", "binding_site.json")
+ 
+-    # resumable: reuse a previously-defined site
++    # resumable: reuse a previously-defined site (unchanged contract)
+     if site_path.exists():
+         site = json.loads(site_path.read_text())
+         st = site.get("status", "ok")
+-        msg = f"cached site: {site.get('method','?')} (RMSD {site.get('superposition_rmsd_A','?')} A)"
++        src = site.get("pocket_source", site.get("method", "?"))
++        msg = f"cached site: {site.get('method','?')} via {src}"
+         if st == "ok":
+             return ok("M4_site", msg, confidence=site.get("confidence"),
+                       data=site, artifacts=[str(site_path)])
+@@ -33,52 +54,122 @@
+                                   data=site, artifacts=[str(site_path)])
+         return unscreenable("M4_site", site.get("reason", "no pocket"), data=site)
+ 
+-    # --- live path: search PDB for a liganded homolog ---
++    # --- live path: run the enabled proposers, let the modulator adjudicate ---
++    proposers = _assemble_proposers(cfg)
++    result = ens.select_site(cfg, receptor_pdb, proposers)
++    proposals = result["proposals"]
++
++    if not proposals or result["winner"] is None:
++        return _unscreenable_no_site(cfg, site_path, result)
++
++    winner = result["winner"]
++    runners = [p for p in proposals if p is not winner]
++    site = {
++        "method": "modulator_selected_ensemble",
++        "pocket_source": winner.source,
++        "box_center": winner.box_center,
++        "box_size": winner.box_size or [cfg.box_size] * 3,
++        "site_residues": winner.site_residues,
++        "confidence": winner.composite,
++        "selection": {
++            "modulator_affinity_kcal_mol": winner.modulator_affinity_kcal_mol,
++            "modulator_coverage": winner.modulator_coverage,
++            "modulator_contact_jaccard": winner.modulator_contact_jaccard,
++            "consensus_n_methods_agreeing": winner.consensus_n,
++            "composite_score": winner.composite,
++            "method_conf": winner.method_conf,
++            "meta": winner.meta,
++        },
++        "runner_up_sites": [p.summary() for p in runners],
++        "proposers_run": result["proposers_run"],
++        "proposers_failed": result["proposers_failed"],
++    }
++
++    cov = winner.modulator_coverage or 0.0
++    aff = winner.modulator_affinity_kcal_mol
++    strong = cov >= cfg.site_select_coverage_ok and aff is not None and aff <= cfg.site_select_affinity_ok
++    consensus = winner.consensus_n >= 1
++    detail = (f"modulator binds {winner.source} box (affinity {aff:.2f} kcal/mol, "
++              f"coverage {cov:.2f}, {winner.consensus_n} other method(s) agree)")
++
++    if strong and consensus:
++        site["status"] = "ok"
++        site_path.write_text(json.dumps(site, indent=2))
++        return ok("M4_site", f"{detail}; site validated by ensemble consensus",
++                  confidence=winner.composite, data=site, artifacts=[str(site_path)])
++
++    site["status"] = "low_confidence"
++    why = ("only one method localised it" if not consensus else "modulator engages but weakly")
++    site_path.write_text(json.dumps(site, indent=2))
++    return low_confidence("M4_site", f"{detail}; {why} — site defined with caveat",
++                          confidence=winner.composite, data=site, artifacts=[str(site_path)])
++
++
++def _unscreenable_no_site(cfg, site_path, result) -> ModuleResult:
++    """No proposer produced a box the modulator engages. Honest, explicit failure."""
++    any_candidate = bool(result["proposals"])
++    payload = {
++        "status": "unscreenable",
++        "pocket_source": "none_found",
++        "confidence": "unscreenable",
++        "proposers_run": result["proposers_run"],
++        "proposers_failed": result["proposers_failed"],
++        "runner_up_sites": [p.summary() for p in result["proposals"]],
++        "identity_cutoff": cfg.homolog_identity_cutoff,
++        "next_actions": ["blind_docking_diffdock_l", "cavity_detection_p2rank",
++                         "manual_site_from_literature", "cofold_holo_boltz2"],
++        "reason": ("candidate pockets were proposed but the modulator engaged none of them"
++                   if any_candidate else
++                   "no site proposer produced a candidate pocket (no liganded homolog, "
++                   "no fpocket cavity, no DiffDock pose)"),
++    }
++    site_path.write_text(json.dumps(payload, indent=2))
++    return unscreenable("M4_site", payload["reason"], data=payload, artifacts=[str(site_path)])
++
++
++# --------------------------------------------------------------------------- proposer wiring
++def _assemble_proposers(cfg):
++    """Build the ordered proposer list from cfg.site_proposers.
++
++    The homolog proposer lives here (not in _site_ensemble) so its RCSB seams
++    `_search_liganded_homologs` / `_transplant_and_box` remain module-level and
++    monkeypatchable by tests.
++    """
++    registry = {
++        "homolog": _homolog_propose,
++        "fpocket": ens.fpocket_propose,
++        "diffdock": ens.diffdock_propose,
++    }
++    return [registry[name] for name in cfg.site_proposers if name in registry]
++
++
++def _homolog_propose(cfg, receptor_pdb):
++    """Liganded-homolog transplant as an ensemble proposer. Returns [] or [SiteProposal]."""
+     hits = _search_liganded_homologs(cfg, receptor_pdb)
+     if not hits:
+-        # THE key graceful-degradation state. No silent fpocket fallback.
+-        payload = {"pocket_source": "none_found",
+-                   "confidence": "unscreenable",
+-                   "fallback_attempted": "rcsb_sequence_search",
+-                   "identity_cutoff": cfg.homolog_identity_cutoff,
+-                   "next_actions": ["blind_docking_diffdock_l", "cavity_detection_p2rank",
+-                                    "manual_site_from_literature"]}
+-        site_path.write_text(json.dumps({"status": "unscreenable", **payload,
+-                                          "reason": "no liganded homolog in PDB above identity/e-value cutoff"}, indent=2))
+-        return unscreenable("M4_site",
+-            "no liganded homolog found in PDB; cannot localize the modulator pocket by transplant",
+-            data=payload, artifacts=[str(site_path)])
+-
+-    best, rmsd, center, residues = _transplant_and_box(cfg, receptor_pdb, hits)
+-    site = {"method": "liganded_homolog_transplant", "homolog": best["pdb_id"],
+-            "homolog_identity": best["identity"], "homolog_ligand": best["ligand"],
+-            "superposition_rmsd_A": round(rmsd, 2), "box_center": center,
+-            "box_size": [cfg.box_size]*3, "site_residues": residues,
+-            "pocket_source": "homolog_transplant"}
++        return []
++    try:
++        best, rmsd, center, residues = _transplant_and_box(cfg, receptor_pdb, hits)
++    except Exception:
++        return []
+     if rmsd > cfg.site_rmsd_low:
+-        site.update(status="unscreenable", pocket_source="homolog_untrustworthy",
+-                    reason=(f"superposition RMSD {rmsd:.1f} A exceeds {cfg.site_rmsd_low} A: a liganded "
+-                            f"homolog ({best['pdb_id']}) exists but its fold cannot be aligned to the model "
+-                            f"(likely a flexible/disordered target or a domain-only crystal form)"),
+-                    next_actions=["check_model_pLDDT_for_disorder", "restrict_to_folded_domain",
+-                                  "blind_docking_diffdock_l", "manual_site_from_literature"])
+-        site_path.write_text(json.dumps(site, indent=2))
+-        return unscreenable("M4_site", site["reason"], data=site, artifacts=[str(site_path)])
++        return []  # fold too far to trust this homolog's frame
++    # RMSD-based internal confidence, matching the original module's scaling
+     conf = max(0.0, min(1.0, (cfg.site_rmsd_low - rmsd) / (cfg.site_rmsd_low - cfg.site_rmsd_ok)))
+-    if rmsd > cfg.site_rmsd_ok:
+-        site["status"] = "low_confidence"; site["confidence"] = round(conf, 2)
+-        site_path.write_text(json.dumps(site, indent=2))
+-        return low_confidence("M4_site", f"homolog {best['pdb_id']} RMSD {rmsd:.1f} A: site defined with caveat",
+-                              confidence=conf, data=site, artifacts=[str(site_path)])
+-    site["status"] = "ok"; site["confidence"] = round(conf, 2)
+-    site_path.write_text(json.dumps(site, indent=2))
+-    return ok("M4_site", f"homolog {best['pdb_id']} ({best['ligand']}) transplanted, RMSD {rmsd:.1f} A",
+-              confidence=conf, data=site, artifacts=[str(site_path)])
++    return [ens.SiteProposal(
++        source="homolog_transplant",
++        box_center=center,
++        site_residues=residues,
++        method_conf=round(conf, 2),
++        meta={"homolog": best["pdb_id"], "homolog_identity": best.get("identity"),
++              "homolog_ligand": best.get("ligand"), "superposition_rmsd_A": round(rmsd, 2)})]
+ 
+ 
+-# --- live-path helpers (imported lazily so the cached path has no heavy deps) ---
++_homolog_propose.proposer_name = "homolog"
++
++
++# --- RCSB seams (kept importable at module level for monkeypatching in tests) ---
+ def _search_liganded_homologs(cfg, receptor_pdb):
+-    """Return list of {pdb_id, identity, ligand, ...} liganded homologs, or []."""
+     from .._homolog import search_liganded_homologs
+     return search_liganded_homologs(cfg, receptor_pdb)
+ 
+--- a/tests/test_pipeline.py	2026-07-07 20:48:01
++++ b/tests/test_pipeline.py	2026-07-10 20:00:55
+@@ -10,9 +10,11 @@
+ from structure_to_screen import PipelineConfig, run_pipeline
+ from structure_to_screen.status import Status
+ from structure_to_screen.modules import m4_site
++from structure_to_screen import _site_ensemble as ens
+ 
+ REPO = Path(__file__).resolve().parents[1]
+ OPLAH = "Nc1ncnc2c1ncn2[C@@H]1O[C@H](COP(=O)([O-])[O-])[C@@H](O)[C@H]1O"
++AMP_BOX = [-16.2, -1.65, 15.2]
+ 
+ 
+ def _oplah_cfg(tmp):
+@@ -40,10 +42,15 @@
+         assert isinstance(r.reason, str) and r.reason
+ 
+ 
+-def test_no_homolog_is_unscreenable(tmp_path, monkeypatch):
++def test_no_site_proposer_yields_anything_is_unscreenable(tmp_path, monkeypatch):
++    """Ensemble contract: when NO proposer produces a candidate (no homolog, no fpocket
++    binary, no DiffDock poses), M4 is unscreenable with the honest none_found payload."""
+     cfg = _oplah_cfg(tmp_path)
+     (cfg.path("m4", "binding_site.json")).unlink(missing_ok=True)
++    # homolog off; fpocket/diffdock contribute nothing in the offline test env
+     monkeypatch.setattr(m4_site, "_search_liganded_homologs", lambda cfg, rec: [])
++    monkeypatch.setattr(ens, "fpocket_propose", lambda cfg, rec: [])
++    monkeypatch.setattr(ens, "diffdock_propose", lambda cfg, rec: [])
+     man = run_pipeline(cfg, verbose=False)
+     assert man.overall_status is Status.UNSCREENABLE
+     m4 = next(r for r in man.results if r.module == "M4_site")
+@@ -53,6 +60,96 @@
+     assert not any(r.module.startswith("M5") for r in man.results)
+ 
+ 
++def _stub_proposal(source, center, residues, conf=0.6):
++    return ens.SiteProposal(source=source, box_center=list(center),
++                            site_residues=list(residues), method_conf=conf)
++
++
++def test_ensemble_selects_fpocket_when_no_homolog(tmp_path, monkeypatch):
++    """The intended new capability: with no liganded homolog, fpocket localises the
++    site and the modulator's own dock validates it (single method -> low_confidence)."""
++    cfg = PipelineConfig(target="O14841", modulator_smiles=OPLAH, modulator_name="5-AMP",
++                         workdir=str(tmp_path / "e1"))
++    monkeypatch.setattr(m4_site, "_search_liganded_homologs", lambda cfg, rec: [])
++    monkeypatch.setattr(ens, "fpocket_propose",
++                        lambda cfg, rec: [_stub_proposal("fpocket", AMP_BOX, [13, 15, 16, 17, 18, 20, 34])])
++    monkeypatch.setattr(ens, "diffdock_propose", lambda cfg, rec: [])
++    monkeypatch.setattr(ens, "_prepare_modulator", lambda cfg: "stub.pdbqt")
++    monkeypatch.setattr(ens, "_dock_modulator",
++                        lambda cfg, rec, lig, center, size, resis, source: (-8.6, 0.86, 0.5))
++    r = m4_site.run(cfg, "receptor.pdbqt")
++    assert r.status is Status.LOW_CONFIDENCE           # only one method agreed
++    assert r.data["pocket_source"] == "fpocket"
++    assert r.data["box_center"] == AMP_BOX
++    assert r.data["selection"]["modulator_coverage"] == 0.86
++
++
++def test_ensemble_consensus_is_ok(tmp_path, monkeypatch):
++    """Two independent methods agreeing on the site + a strong modulator dock -> ok."""
++    cfg = PipelineConfig(target="O14841", modulator_smiles=OPLAH, workdir=str(tmp_path / "e2"))
++    monkeypatch.setattr(m4_site, "_search_liganded_homologs", lambda cfg, rec: [])
++    monkeypatch.setattr(ens, "fpocket_propose",
++                        lambda cfg, rec: [_stub_proposal("fpocket", AMP_BOX, [13, 15, 16, 17, 18, 20, 34])])
++    monkeypatch.setattr(ens, "diffdock_propose",
++                        lambda cfg, rec: [_stub_proposal("diffdock", [-15.8, -1.2, 15.6], [16, 17, 18])])
++    monkeypatch.setattr(ens, "_prepare_modulator", lambda cfg: "stub.pdbqt")
++    monkeypatch.setattr(ens, "_dock_modulator",
++                        lambda cfg, rec, lig, center, size, resis, source: (-8.6, 0.9, 0.7))
++    r = m4_site.run(cfg, "receptor.pdbqt")
++    assert r.status is Status.OK
++    assert r.data["selection"]["consensus_n_methods_agreeing"] >= 1
++    # the losing method is reported, not discarded
++    assert len(r.data["runner_up_sites"]) == 1
++    assert r.data["runner_up_sites"][0]["confidence_flag"] == "viable"
++
++
++def test_ensemble_unscreenable_when_modulator_rejects_all(tmp_path, monkeypatch):
++    """Candidates exist but the modulator engages none -> honest unscreenable."""
++    cfg = PipelineConfig(target="O14841", modulator_smiles=OPLAH, workdir=str(tmp_path / "e3"))
++    monkeypatch.setattr(m4_site, "_search_liganded_homologs", lambda cfg, rec: [])
++    monkeypatch.setattr(ens, "fpocket_propose",
++                        lambda cfg, rec: [_stub_proposal("fpocket", AMP_BOX, [13, 15, 16])])
++    monkeypatch.setattr(ens, "diffdock_propose", lambda cfg, rec: [])
++    monkeypatch.setattr(ens, "_prepare_modulator", lambda cfg: "stub.pdbqt")
++    monkeypatch.setattr(ens, "_dock_modulator",
++                        lambda cfg, rec, lig, center, size, resis, source: (None, 0.0, 0.0))
++    r = m4_site.run(cfg, "receptor.pdbqt")
++    assert r.status is Status.UNSCREENABLE
++    assert r.data["pocket_source"] == "none_found"
++    assert "engaged none" in r.data["reason"]
++    # the rejected candidate is still surfaced
++    assert r.data["runner_up_sites"][0]["confidence_flag"] == "rejected"
++
++
++def _min_sdf():
++    """A 2-atom V2000 SDF with correct 10-char coordinate fields (centroid = [-15.7,-1.65,15.2])."""
++    a1 = f"{-16.2:10.4f}{-1.65:10.4f}{15.2:10.4f} C   0  0"
++    a2 = f"{-15.2:10.4f}{-1.65:10.4f}{15.2:10.4f} O   0  0"
++    return ("mol\n  prog\ncomment\n"
++            "  2  1  0  0  0  0  0  0  0  0999 V2000\n"
++            f"{a1}\n{a2}\n  1  2  1  0\nM  END\n$$$$\n")
++
++
++def test_diffdock_proposer_pose_sources(tmp_path):
++    """DiffDock proposer is non-blocking by default and resumable from its per-run cache."""
++    # (1) run disabled, no poses -> contributes nothing (never blocks)
++    cfg = PipelineConfig(target="O14841", modulator_smiles=OPLAH, modulator_name="5-AMP",
++                         workdir=str(tmp_path / "d1"))
++    assert ens._find_diffdock_poses(cfg, "receptor.pdbqt") == []
++
++    # (2) poses already in the per-run cache -> reused, no run
++    cfg2 = PipelineConfig(target="O14841", modulator_smiles=OPLAH, modulator_name="5-AMP",
++                          workdir=str(tmp_path / "d2"))
++    cache = cfg2.path("m4", "diffdock", ens._diffdock_complex_name(cfg2))
++    cache.mkdir(parents=True, exist_ok=True)
++    (cache / "rank1_confidence-0.98.sdf").write_text(_min_sdf())
++    got = ens._find_diffdock_poses(cfg2, "receptor.pdbqt")
++    assert len(got) == 1 and got[0].endswith("rank1_confidence-0.98.sdf")
++    props = ens.diffdock_propose(cfg2, None)          # None receptor -> centroid only, residues []
++    assert props and props[0].source == "diffdock"
++    assert props[0].box_center == [-15.7, -1.65, 15.2]
++
++
+ def test_unknown_target_unscreenable(tmp_path):
+     cfg = PipelineConfig(target="ZZZZZZ", modulator_smiles="CCO",
+                          modulator_name="x", workdir=str(tmp_path / "bad"))
+--- a/docs/IO_CONTRACT.md	2026-07-08 10:54:08
++++ b/docs/IO_CONTRACT.md	2026-07-10 20:01:15
+@@ -16,7 +16,7 @@
+ | M1 | `m1_intake` | UniProt acc | `m1/<acc>.fasta`, `_af.cif`, `_pae.json`, `intake.json` | no UniProt seq, or no AlphaFold DB model (→ predict de novo) | — |
+ | M2 | `m2_qc` | M1 cif | `m2/qc.json` | no structure to QC | mean pLDDT < `min_mean_plddt` (70) |
+ | M3 | `m3_receptor` | M1 structure | `m3/receptor.pdb`, `receptor.pdbqt` | prep fails / empty PDBQT | — |
+-| M4 | `m4_site` | M1 fasta, M3 receptor | `m4/binding_site.json`, `m4/homologs/*.pdb` | **no liganded homolog found**, or superposition RMSD > `site_rmsd_low` (4 Å) | superposition RMSD > `site_rmsd_ok` (2.5 Å) |
++| M4 | `m4_site` | M1 fasta, M3 receptor | `m4/binding_site.json`, `m4/homologs/*.pdb`, `m4/fpocket/*`, `m4/select/*` | **no proposer yields a box the modulator engages** (`pocket_source:"none_found"`) | modulator engages but weakly, or only one method localised the site |
+ | M5 | `m5_validate` | M3 receptor, M4 site | `m5/validation.json` | anchor does not dock in the site | anchor engages pocket but pose shifted (overlap < `pose_overlap_ok`) → `pose_trust` |
+ | M6 | `m6_library` | modulator SMILES | `m6/candidate_library.csv` | no compounds found | < 10 compounds |
+ | M7 | `m7_screen` | M3 receptor, M4 site, M6 library | `m7/docking_scores.csv` | nothing docked | > half of ligands fail to dock |
+@@ -42,7 +42,7 @@
+ | M1 | UniProt FASTA + AlphaFold DB model fetch | ✅ live (OPLAH, c-Myc) |
+ | M2 | pLDDT confidence parse | ✅ live (OPLAH, c-Myc) |
+ | M3 | trim → protonate → PDBQT (mmCIF auto-converted) | ✅ live (c-Myc fresh build) |
+-| M4 | RCSB liganded-homolog search + superposition transplant (`_homolog.py`) | ✅ live (OPLAH 7HK7, c-Myc) |
++| M4 | **ensemble**: homolog transplant (`_homolog.py`) + fpocket (druggability-ranked) + DiffDock blind pose, adjudicated by docking the modulator into each candidate (`_site_ensemble.py`) | ✅ live (OPLAH: fpocket wins, modulator −8.6 kcal/mol, 2.8 Å from hand-found box) |
+ | M5 | Meeko ligand prep + Vina dock of the anchor; pose overlap / contact-Jaccard vs the transplanted reference ligand (`_dock.dock_reference`) | ✅ live (5-AMP, −8.1 kcal/mol) |
+ | M6 | ChEMBL similarity/substructure build, or user-supplied `m6/candidate_library.csv` (`_library.build_library`) | ⚙️ implemented; BYO-CSV path used; live ChEMBL build not yet run end-to-end |
+ | M7 | parallel Vina screen, per-ligand atomic `.sc` writes + resume-on-restart (`_dock.screen_library`) | ⚙️ implemented + unit-tested; not yet run on a fresh target through the package API |
+@@ -58,6 +58,51 @@
+ 
+ See `MCP_TOOLS.md` for the agent-facing tool surface.
+ 
++## M4 ensemble site selection (the modulator adjudicates)
++
++M4 no longer trusts a single site-finder. It runs several **pluggable proposers** and
++lets the known modulator's own docking decide which proposed pocket is real
++(`_site_ensemble.py`). Which proposers run is `cfg.site_proposers` (default all three):
++
++| proposer | signal | notes |
++|----------|--------|-------|
++| `homolog` | liganded-homolog transplant (the original M4) | RCSB seams stay monkeypatchable in `m4_site` |
++| `fpocket` | ligand-free cavity detection, ranked by **druggability** | fpocket's default `Score` buries real sites — rank by druggability (`FAILURE_MODES.md`) |
++| `diffdock` | top-confidence blind pose of the modulator | non-blocking by default: reads a completed dock (`cfg.diffdock_poses_dir`) or the per-run cache `m4/diffdock/<complex>/`. Set `cfg.diffdock_run=True` + `cfg.diffdock_repo` to have M4 launch DiffDock itself (~1 h CPU), cache the poses, and reuse them on resume |
++
++**Adjudication.** Each proposer returns candidate box centre(s) + residues (or `[]` on any
++failure — a proposer never raises). The modulator is docked into a uniform probe box
++(`cfg.box_size`) on every candidate and scored:
++
++```
++composite = 0.40*coverage + 0.40*affinity_norm + 0.20*consensus
++  coverage      = frac of the modulator's docked contacts that fall in the proposer's
++                  residues (size-robust: a large correct pocket is not penalised, unlike Jaccard)
++  affinity_norm = (aff − (−4)) / ((−12) − (−4)), clipped to [0,1]
++  consensus     = other methods whose box centre is within cfg.consensus_radius_A (8 Å)
++```
++
++The best-engaged candidate wins; the rest are written to `runner_up_sites` with a
++`viable`/`rejected` flag — never discarded. Status: **ok** when the winner is engaged well
++(`coverage ≥ site_select_coverage_ok`, `aff ≤ site_select_affinity_ok`) **and** ≥1 other
++method agrees; **low_confidence** when engaged but weak or single-method; **unscreenable**
++(`pocket_source:"none_found"`) when the modulator engages no candidate — an honest failure
++grounded in the modulator's binding, not merely in homolog availability.
++
++Added `binding_site.json` keys (all backward-compatible; `box_center`/`box_size`/
++`site_residues` unchanged): `selection{modulator_affinity_kcal_mol, modulator_coverage,
++modulator_contact_jaccard, consensus_n_methods_agreeing, composite_score, meta}`,
++`runner_up_sites[]`, `proposers_run[]`, `proposers_failed[]`. Config:
++`site_proposers, fpocket_bin, fpocket_top_k, diffdock_poses_dir, consensus_radius_A,
++site_select_coverage_ok, site_select_affinity_ok`. The cold-start path needs the `dock`
++extra (RDKit/Meeko/Vina) since it docks the modulator to choose; the cache-first path
++(reusing `m4/binding_site.json`) has no heavy deps, as before.
++
++**OPLAH result (live):** with no reliable liganded homolog, fpocket wins — the modulator
++docks at **−8.6 kcal/mol**, its box centre **2.8 Å** from the hand-found AMP box; DiffDock's
++blind pose is reported as a runner-up but sits ~9 Å off, so the site is **low_confidence**
++(single strong method), consistent with the M5 `induced_fit_limited` verdict below.
++
+ ## M5 confidence diagnostic (box-contraction sweep)
+ 
+ To distinguish a rigid-receptor artifact from a pocket-mislocalization, M5 can run

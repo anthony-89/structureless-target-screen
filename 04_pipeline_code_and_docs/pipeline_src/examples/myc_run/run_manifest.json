@@ -1,0 +1,105 @@
+{
+  "target": "P01106",
+  "modulator": "10058-F4",
+  "started_at": 1783448056.324097,
+  "overall_status": "unscreenable",
+  "n_modules_run": 4,
+  "reached_module": "M4_site",
+  "results": [
+    {
+      "module": "M1_intake",
+      "status": "ok",
+      "reason": "cached: P01106 (454 aa)",
+      "confidence": null,
+      "data": {
+        "accession": "P01106",
+        "seq_len": 454,
+        "af_entry": "AF-P01106-F1",
+        "af_version": 6,
+        "modulator": "10058-F4",
+        "modulator_mode": "inhibitor"
+      },
+      "artifacts": [
+        "s2s_runs/myc/m1/P01106.fasta",
+        "s2s_runs/myc/m1/P01106_af.cif"
+      ],
+      "metrics": {},
+      "elapsed_s": 0.0
+    },
+    {
+      "module": "M2_qc",
+      "status": "low_confidence",
+      "reason": "mean pLDDT 60.4 < 70: model confidence marginal; docking results carry this caveat",
+      "confidence": 0.231,
+      "data": {
+        "mean_plddt": 60.41,
+        "frac_ge_70": 0.231,
+        "n_residues": 454,
+        "min": 31.44
+      },
+      "artifacts": [
+        "s2s_runs/myc/m2/qc.json"
+      ],
+      "metrics": {
+        "mean_plddt": 60.41,
+        "frac_ge_70": 0.231,
+        "n_residues": 454,
+        "min": 31.44
+      },
+      "elapsed_s": 0.0
+    },
+    {
+      "module": "M3_receptor",
+      "status": "ok",
+      "reason": "prepared receptor (4382 atoms)",
+      "confidence": null,
+      "data": {
+        "pdbqt_atoms": 4382
+      },
+      "artifacts": [
+        "s2s_runs/myc/m3/receptor.pdbqt",
+        "s2s_runs/myc/m3/receptor.pdb"
+      ],
+      "metrics": {},
+      "elapsed_s": 4.63
+    },
+    {
+      "module": "M4_site",
+      "status": "unscreenable",
+      "reason": "superposition RMSD 39.5 A exceeds 4.0 A: a liganded homolog (8OTS) exists but its fold cannot be aligned to the model (likely a flexible/disordered target or a domain-only crystal form)",
+      "confidence": null,
+      "data": {
+        "method": "liganded_homolog_transplant",
+        "homolog": "8OTS",
+        "homolog_identity": 1.0,
+        "homolog_ligand": "PTD",
+        "superposition_rmsd_A": 39.48,
+        "box_center": [
+          -10.83,
+          -6.91,
+          -1.91
+        ],
+        "box_size": [
+          22.0,
+          22.0,
+          22.0
+        ],
+        "site_residues": [],
+        "pocket_source": "homolog_untrustworthy",
+        "status": "unscreenable",
+        "reason": "superposition RMSD 39.5 A exceeds 4.0 A: a liganded homolog (8OTS) exists but its fold cannot be aligned to the model (likely a flexible/disordered target or a domain-only crystal form)",
+        "next_actions": [
+          "check_model_pLDDT_for_disorder",
+          "restrict_to_folded_domain",
+          "blind_docking_diffdock_l",
+          "manual_site_from_literature"
+        ]
+      },
+      "artifacts": [
+        "s2s_runs/myc/m4/binding_site.json"
+      ],
+      "metrics": {},
+      "elapsed_s": 8.29
+    }
+  ]
+}

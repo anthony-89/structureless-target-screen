@@ -1,0 +1,56 @@
+# ============================================================
+#  OPLAH structure-to-screen — .gitignore
+#  Keeps the repo to code + results + docs (a few MB).
+#  Excludes ~2.3 GB of regenerable data / vendored tools / dead-ends.
+# ============================================================
+
+# --- Prepared ligand libraries (194 MB + 40 MB) — regenerable via prep scripts ---
+05b_pocket_detection/taskC/ligs_50k/
+05b_pocket_detection/taskC/colab/ligs_50k.zip
+
+# --- Docking pose files — keep the results CSVs, not the thousands of poses ---
+05b_pocket_detection/taskC/dock_5k/poses/
+05b_pocket_detection/taskC/nucleotide_run/poses/
+05b_pocket_detection/taskC/bench_diverse/
+
+# --- Vendored tool download (~554 MB) — install separately (see README) ---
+05b_pocket_detection/tools/
+
+# --- DiffDock dead-ends: heavy binaries only (868 MB venv + 586 MB model). ---
+#     The lightweight RESULTS.md / scripts stay, for honesty about what we tried.
+05_diffdock_local/.venv/
+05_diffdock_local/DiffDock/
+03_diffdock_attempt/diffdock_inputs_truncated.zip
+
+# --- Repo snapshots (redundant with pipeline_src/) ---
+04_pipeline_code_and_docs/*.tar.gz
+
+# --- Superseded drafts (kept locally, NOT part of the submission) ---
+submission/_archive_claude_science/
+
+# --- Regenerable P2Rank visualization bundle ---
+05b_pocket_detection/p2rank_out/visualizations/
+
+# --- Scratch / logs / OS / Python ---
+__pycache__/
+*.pyc
+*.pyo
+.DS_Store
+*.log
+.venv/
+venv/
+env/
+
+# --- tightened after pre-push audit (2026-07-13) ---
+# Raw ZINC tranche downloads (~30 MB) — regenerable; the final zinc_diverse_50k.csv is kept
+05b_pocket_detection/taskC/library/raw/
+# Regenerable fpocket raw output (the derived pockets_fpocket.csv is kept at repo top level)
+05b_pocket_detection/fpocket_run/
+# DiffDock dead-end: vendored binaries + work outputs (RESULTS.md + scripts stay, for honesty)
+05_diffdock_local/bin/
+05_diffdock_local/fpocket_work/
+05_diffdock_local/vina_work/
+05_diffdock_local/results/
+# Any remaining docking-pose directories (regenerable; keep taskB/pockets as site evidence)
+**/poses/
+05b_pocket_detection/taskC/bench/
