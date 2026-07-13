@@ -22,9 +22,10 @@ from footprint import (parse_pdb_heavy, parse_pdbqt_ligand, parse_sdf_heavy,
                        AMP_FOOTPRINT, ADENINE_MOTIF, PHOSPHATE_MOTIF,
                        BOX_AMP_ANCHORED, BOX_ORIGINAL_TRIPHOS, CUTOFF)
 
-IN = "/Users/antonioesquivel/Desktop/claude_code_handoff/01_inputs"
+_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+IN = os.path.join(_ROOT, "01_inputs")
 OUTDIR = sys.argv[1] if len(sys.argv) > 1 else \
-    "/Users/antonioesquivel/Desktop/claude_code_handoff/05_diffdock_local/DiffDock/out/oplah_amp_blind"
+    os.path.join(_ROOT, "05_diffdock_local/DiffDock/out/oplah_amp_blind")
 
 REF7 = sorted(AMP_FOOTPRINT)
 

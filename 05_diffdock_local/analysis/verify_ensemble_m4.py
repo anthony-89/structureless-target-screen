@@ -9,8 +9,8 @@ import shutil
 import sys
 from pathlib import Path
 
-HANDOFF = Path("/Users/antonioesquivel/Desktop/claude_code_handoff")
-sys.path.insert(0, str(HANDOFF / "04_pipeline_code_and_docs/pipeline_src"))
+ROOT = Path(__file__).resolve().parents[2]   # repo root
+sys.path.insert(0, str(ROOT / "04_pipeline_code_and_docs/pipeline_src"))
 
 from structure_to_screen.config import PipelineConfig
 from structure_to_screen.modules import m4_site
@@ -23,17 +23,17 @@ if wd.exists():
     shutil.rmtree(wd)
 (wd / "m1").mkdir(parents=True)
 (wd / "m3").mkdir(parents=True)
-shutil.copy(HANDOFF / "01_inputs/oplah_receptor.pdb", wd / "m3/receptor.pdb")
-shutil.copy(HANDOFF / "01_inputs/oplah_receptor.pdbqt", wd / "m3/receptor.pdbqt")
-shutil.copy(HANDOFF / "01_inputs/oplah_sequence.fasta", wd / "m1/O14841.fasta")
+shutil.copy(ROOT / "01_inputs/oplah_receptor.pdb", wd / "m3/receptor.pdb")
+shutil.copy(ROOT / "01_inputs/oplah_receptor.pdbqt", wd / "m3/receptor.pdbqt")
+shutil.copy(ROOT / "01_inputs/oplah_sequence.fasta", wd / "m1/O14841.fasta")
 
 cfg = PipelineConfig(
     target="O14841", modulator_smiles=AMP_SMILES, modulator_name="5-AMP",
     modulator_mode="activator", workdir=str(wd),
     site_proposers=("homolog", "fpocket", "diffdock"),
-    fpocket_bin=str(HANDOFF / "05_diffdock_local/bin/fpocket"),
+    fpocket_bin=str(ROOT / "05_diffdock_local/bin/fpocket"),
     fpocket_top_k=2,
-    diffdock_poses_dir=str(HANDOFF / "05_diffdock_local/DiffDock/out/oplah_amp_blind"),
+    diffdock_poses_dir=str(ROOT / "05_diffdock_local/DiffDock/out/oplah_amp_blind"),
     exhaustiveness=8, num_modes=9, box_size=20.0,
 )
 

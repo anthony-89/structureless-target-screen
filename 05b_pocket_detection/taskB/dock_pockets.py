@@ -5,9 +5,8 @@ AMP ranks the pockets itself by affinity. No pocket is privileged going in.
 import csv, subprocess, os, sys
 from pathlib import Path
 
-BASE = Path("/Users/antonioesquivel/Desktop/claude_code_handoff")
-DOCK = Path("/Users/antonioesquivel/.claude-science/conda/envs/dock")
-VINA = str(DOCK / "bin" / "vina")
+BASE = Path(__file__).resolve().parents[2]   # repo root
+VINA = os.environ.get("VINA", "vina")        # Vina on PATH (activate the dock env), or set $VINA
 REC = str(BASE / "01_inputs" / "oplah_receptor.pdbqt")
 LIG = str(BASE / "05b_pocket_detection/taskB/ligand/5amp.pdbqt")
 POCKETS = BASE / "05b_pocket_detection/pockets_p2rank.csv"

@@ -1,14 +1,15 @@
-"""Sanity check: reproduce HANDOFF.md's AMP footprint numbers from raw coordinates.
+"""Sanity check: reproduce the manual Vina AMP footprint numbers from raw coordinates.
 
 If this does not match, no downstream DiffDock measurement can be trusted.
 """
+import os
 import numpy as np
 from footprint import (parse_pdb_heavy, parse_pdbqt_ligand, residue_min_distances,
                        footprint, AMP_FOOTPRINT, BOX_AMP_ANCHORED, BOX_ORIGINAL_TRIPHOS)
 
-IN = "/Users/antonioesquivel/Desktop/claude_code_handoff/01_inputs"
+IN = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "01_inputs")
 
-# HANDOFF.md section 2 / section 7
+# reference values from the manual Vina run (Task B)
 EXPECTED = {13: 3.08, 15: 4.29, 16: 3.55, 17: 2.06, 18: 3.45, 20: 2.88, 34: 4.30}
 EXPECTED_NONCONTACT = {14: 6.72}  # R14: part of the P-loop motif, NOT a direct contact
 
@@ -25,7 +26,7 @@ print(f"  dist -> AMP-anchored box center {BOX_AMP_ANCHORED}: "
 print(f"  dist -> original triphosphate box {BOX_ORIGINAL_TRIPHOS}: "
       f"{np.linalg.norm(cent - BOX_ORIGINAL_TRIPHOS):.2f} A")
 print(f"  box-to-box separation: {np.linalg.norm(BOX_AMP_ANCHORED - BOX_ORIGINAL_TRIPHOS):.2f} A"
-      f"   (HANDOFF says 11.6)")
+      f"   (reference: 11.6)")
 
 mins = residue_min_distances(lig, prot_xyz, prot_meta)
 
@@ -49,11 +50,11 @@ for r, exp in EXPECTED_NONCONTACT.items():
 
 fp, _ = footprint(lig, prot_xyz, prot_meta)
 print(f"\nfootprint @4.5A  : {sorted(fp)}")
-print(f"HANDOFF footprint: {sorted(AMP_FOOTPRINT)}")
+print(f"reference footprint: {sorted(AMP_FOOTPRINT)}")
 print(f"exact match      : {fp == AMP_FOOTPRINT}")
 extra = fp - AMP_FOOTPRINT
 if extra:
-    print(f"extra residues within 4.5A not listed in HANDOFF: "
+    print(f"extra residues within 4.5A not in the reference footprint:"
           f"{[(mins[r][1] + str(r), round(mins[r][0], 2)) for r in sorted(extra)]}")
 
 print(f"\nVALIDATION {'PASSED' if ok_all and fp == AMP_FOOTPRINT else 'NEEDS REVIEW'}")

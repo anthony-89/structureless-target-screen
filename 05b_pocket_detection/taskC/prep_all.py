@@ -3,13 +3,14 @@
 Writes ligs_50k/<lig_id>.pdbqt and a zip bundle for upload."""
 import os, csv, time, zipfile
 from multiprocessing import Pool
+from pathlib import Path
 from rdkit import Chem
 from rdkit.Chem import AllChem
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 from meeko import MoleculePreparation, PDBQTWriterLegacy
 
-BASE = "/Users/antonioesquivel/Desktop/claude_code_handoff/05b_pocket_detection/taskC"
+BASE = str(Path(__file__).resolve().parent)   # 05b_pocket_detection/taskC
 LIB = f"{BASE}/library/zinc_diverse_50k.csv"
 OUTDIR = f"{BASE}/ligs_50k"
 os.makedirs(OUTDIR, exist_ok=True)

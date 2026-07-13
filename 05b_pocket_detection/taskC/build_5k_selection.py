@@ -13,7 +13,7 @@ from rdkit.SimDivFilters import rdSimDivPickers
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
-BASE = Path("/Users/antonioesquivel/Desktop/claude_code_handoff/05b_pocket_detection/taskC")
+BASE = Path(__file__).resolve().parent   # 05b_pocket_detection/taskC
 LIB = BASE / "library/zinc_diverse_50k.csv"
 LIGDIR = BASE / "ligs_50k"
 AMP = "Nc1ncnc2c1ncn2C1OC(COP(=O)(O)O)C(O)C1O"

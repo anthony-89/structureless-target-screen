@@ -8,6 +8,9 @@
 05b_pocket_detection/taskC/ligs_50k/
 05b_pocket_detection/taskC/colab/ligs_50k.zip
 
+# --- Regenerable docking input list (5000 absolute pdbqt paths; rebuilt by build_5k_selection.py) ---
+05b_pocket_detection/taskC/selected_5k_list.txt
+
 # --- Docking pose files — keep the results CSVs, not the thousands of poses ---
 05b_pocket_detection/taskC/dock_5k/poses/
 05b_pocket_detection/taskC/nucleotide_run/poses/
@@ -35,6 +38,9 @@
 
 # --- Regenerable P2Rank visualization bundle ---
 05b_pocket_detection/p2rank_out/visualizations/
+
+# --- Personal Claude Code local settings (permission allowlist; not for the public repo) ---
+.claude/settings.local.json
 
 # --- Scratch / logs / OS / Python ---
 __pycache__/

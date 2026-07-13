@@ -1,6 +1,6 @@
 # OPLAH structure-to-screen — local DiffDock + fpocket results
 
-Continuation of `HANDOFF.md`. All work is under `05_diffdock_local/`.
+The local DiffDock + manual-Vina work (the truncation dead-end we rejected). All work is under `05_diffdock_local/`.
 Environment: Apple Silicon (arm64), macOS 26.4, 16 GB RAM, CPU only.
 
 ## TL;DR

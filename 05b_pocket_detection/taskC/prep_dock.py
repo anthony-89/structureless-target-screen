@@ -12,9 +12,8 @@ from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 from meeko import MoleculePreparation, PDBQTWriterLegacy
 
-DOCK = Path("/Users/antonioesquivel/.claude-science/conda/envs/dock")
-VINA = str(DOCK / "bin" / "vina")
-REC = "/Users/antonioesquivel/Desktop/claude_code_handoff/01_inputs/oplah_receptor.pdbqt"
+VINA = os.environ.get("VINA", "vina")   # Vina on PATH (activate the dock env), or set $VINA
+REC = str(Path(__file__).resolve().parents[2] / "01_inputs/oplah_receptor.pdbqt")
 
 # AMP's pocket (Task B). Focused box now that the site is known.
 CX, CY, CZ = -15.58, -4.55, 17.09

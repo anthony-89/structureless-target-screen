@@ -28,4 +28,4 @@ Top 8 from the DIVERSITY arm (novel, low AMP-similarity — the #4 story):
    7.   1940195618  -10.30  sim=0.112  NC(=O)[C@H]1CC[C@H]2OCCN(C(=O)c3cc(=O)n(-c4ccccc
    8.   2100556148  -10.25  sim=0.122  N=c1cc(C(=O)N[C@@H]2C[C@H](C(=O)N3CCC4(CCCO4)CC3
 
--> /Users/antonioesquivel/Desktop/claude_code_handoff/05b_pocket_detection/taskC/dock_5k/shortlist_5k.csv
+-> 05b_pocket_detection/taskC/dock_5k/shortlist_5k.csv

@@ -10,7 +10,7 @@ from pathlib import Path
 RUN = Path(sys.argv[1])
 LIB = sys.argv[2]
 TOPN = int(sys.argv[3]) if len(sys.argv) > 3 else 40
-REC = "/Users/antonioesquivel/Desktop/claude_code_handoff/01_inputs/oplah_receptor.pdbqt"
+REC = str(Path(__file__).resolve().parents[2] / "01_inputs/oplah_receptor.pdbqt")
 AMP_FOOTPRINT = {13,15,16,17,18,20,34, 314,316,317,318,319, 489,490,515,518,519}
 CUTOFF = 4.0
 AMP_AFFINITY = -8.78   # AMP's own best affinity in this pocket (Task B)

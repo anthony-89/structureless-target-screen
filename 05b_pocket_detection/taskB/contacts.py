@@ -7,7 +7,7 @@ No reference to any assumed/homolog site is used to define the answer.
 import math
 from pathlib import Path
 
-BASE = Path("/Users/antonioesquivel/Desktop/claude_code_handoff")
+BASE = Path(__file__).resolve().parents[2]   # repo root
 REC = BASE / "01_inputs/oplah_receptor.pdbqt"
 POSE = BASE / "05b_pocket_detection/taskB/pockets/amp_pocket01_out.pdbqt"
 CUTOFF = 4.0

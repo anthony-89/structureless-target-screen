@@ -2,13 +2,13 @@
 
 Footprint = set of receptor residues within CUTOFF of any ligand heavy atom.
 Distances are min heavy-atom -> heavy-atom, matching how the reference AMP
-footprint in HANDOFF.md was defined.
+footprint from the manual Vina run was defined.
 """
 import numpy as np
 
 CUTOFF = 4.5
 
-# Reference footprint from the manual Vina work (HANDOFF.md section 2).
+# Reference footprint from the manual Vina work (Task B).
 AMP_FOOTPRINT = {13, 15, 16, 17, 18, 20, 34}
 ADENINE_MOTIF = {18}                     # F18 aromatic stack
 PHOSPHATE_MOTIF = {13, 15, 16, 17, 20, 34}

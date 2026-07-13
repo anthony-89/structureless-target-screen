@@ -11,7 +11,7 @@ from rdkit.Chem import Descriptors, rdMolDescriptors
 from rdkit import RDLogger
 RDLogger.DisableLog('rdApp.*')
 
-BASE = Path("/Users/antonioesquivel/Desktop/claude_code_handoff")
+BASE = Path(__file__).resolve().parents[2]   # repo root
 OUT = BASE / "05b_pocket_detection/taskC/library/nucleotide_focused.csv"
 
 NAMES = [

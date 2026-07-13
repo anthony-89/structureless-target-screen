@@ -5,7 +5,7 @@ counts how many beat AMP, and highlights the diversity-arm (novel) winners = the
 import csv
 from pathlib import Path
 
-BASE = Path("/Users/antonioesquivel/Desktop/claude_code_handoff/05b_pocket_detection/taskC")
+BASE = Path(__file__).resolve().parent   # 05b_pocket_detection/taskC
 RES = BASE / "dock_5k/results.csv"
 SEL = BASE / "selected_5k.csv"
 AMP_F = BASE / "dock_5k/AMP_control_score.txt"

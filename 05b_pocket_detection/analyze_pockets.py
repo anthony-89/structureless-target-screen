@@ -7,7 +7,7 @@ No truncation, no homolog transplant. Just geometry/ML on the whole protein.
 import csv, json, math, re
 from pathlib import Path
 
-BASE = Path("/Users/antonioesquivel/Desktop/claude_code_handoff")
+BASE = Path(__file__).resolve().parents[1]   # repo root
 P2 = BASE / "05b_pocket_detection/p2rank_out/oplah_af.pdb_predictions.csv"
 FP_INFO = BASE / "05b_pocket_detection/fpocket_run/oplah_af_out/oplah_af_info.txt"
 FP_PQR = BASE / "05b_pocket_detection/fpocket_run/oplah_af_out/oplah_af_pockets.pqr"

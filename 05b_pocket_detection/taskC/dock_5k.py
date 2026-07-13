@@ -6,9 +6,9 @@ import csv, os, subprocess, time
 from pathlib import Path
 from multiprocessing import Pool
 
-BASE = Path("/Users/antonioesquivel/Desktop/claude_code_handoff/05b_pocket_detection/taskC")
-REC = "/Users/antonioesquivel/Desktop/claude_code_handoff/01_inputs/oplah_receptor.pdbqt"
-VINA = "/Users/antonioesquivel/.claude-science/conda/envs/dock/bin/vina"
+BASE = Path(__file__).resolve().parent            # 05b_pocket_detection/taskC
+REC = str(BASE.parents[1] / "01_inputs/oplah_receptor.pdbqt")
+VINA = os.environ.get("VINA", "vina")             # Vina on PATH (activate the dock env), or set $VINA
 AMP_LIG = str(BASE / "taskB/ligand/5amp.pdbqt")
 OUTDIR = BASE / "dock_5k/poses"; OUTDIR.mkdir(parents=True, exist_ok=True)
 RESULTS = BASE / "dock_5k/results.csv"

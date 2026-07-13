@@ -3,13 +3,15 @@
 fpocket is ligand-free, so this is an independent geometric vote on where the
 site is. Pockets in *_info.txt are ordered by fpocket score (descending).
 """
+import os
 import re
 import sys
 import numpy as np
 from footprint import AMP_FOOTPRINT, BOX_AMP_ANCHORED, BOX_ORIGINAL_TRIPHOS, jaccard
 
-OUT = sys.argv[1] if len(sys.argv) > 1 else \
-    "/Users/antonioesquivel/Desktop/claude_code_handoff/05_diffdock_local/fpocket_work/oplah_receptor_out"
+OUT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+    "05_diffdock_local/fpocket_work/oplah_receptor_out")
 STEM = OUT.rstrip("/").split("/")[-1].replace("_out", "")
 
 
