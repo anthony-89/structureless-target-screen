@@ -31,8 +31,11 @@
 # --- Production scaffolding: kept LOCAL, never in the public repo ---
 #     (video script, submission plan, handoff logs, review notes, continue-here)
 #     These help produce/submit the project; nobody reproducing the work needs them,
-#     and some leak a private artifact URL. Public showcase assets live in demo/.
+#     and some leak a private artifact URL.
 /submission/
+# --- Demo/showcase assets: video source, one-pager, figures, summary. Kept local;
+#     the public repo is reproduction-only. ---
+/demo/
 /HANDOFF.md
 /HANDOFF_CLAUDE_SCIENCE.md
 /HANDOFF_FROM_CLAUDE_SCIENCE_final_push.md

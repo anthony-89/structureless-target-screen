@@ -193,7 +193,6 @@ Built and driven with **Claude Code**.
 05b_pocket_detection/          ← the unbiased analysis (Tasks A–C) + results + scripts
 04_pipeline_code_and_docs/     the modular structure-to-screen pipeline (M1–M8) + docs
 03_diffdock_attempt/  05_diffdock_local/   ARCHIVED — the truncation dead-ends we rejected (kept for honesty)
-demo/                          showcase — interactive viewer, one-pager, result figures, written summary
 ```
 
 ## License
