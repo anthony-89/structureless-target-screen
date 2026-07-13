@@ -110,7 +110,12 @@ eight modules:
 | M7 | screen | dock the library (AutoDock Vina) |
 | M8 | prioritize | consensus rank + scaffold diversity → shortlist |
 
-M4 is what lets the tool work structure-free — and rather than trust any single site-finder, it
+**M4 is the module that carries the science.** It is the packaged, tested implementation of the
+unbiased site-finder that the standalone `05b_pocket_detection/` analysis validated by hand on
+OPLAH (`verify_ensemble_m4.py` checks it re-selects AMP's pocket). M1–M3 and M5–M8 are the
+scaffolding that lets it run end-to-end and agent-callable.
+
+M4 lets the tool work structure-free — and rather than trust any single site-finder, it
 lets the known modulator's own docking adjudicate among several proposers, which is why the
 status contract centers on it. (The liganded-homolog transplant is one proposer of several — the
 original method, now cross-checked instead of trusted blindly.) See

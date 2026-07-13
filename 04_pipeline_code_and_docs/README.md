@@ -134,7 +134,12 @@ eight modules:
 | M7 | screen | dock the library (AutoDock Vina) |
 | M8 | prioritize | consensus rank + scaffold diversity → shortlist |
 
-M4 is what lets the tool work structure-free — and rather than trust any single site-finder, it
+**M4 is the module that carries the science.** It is the packaged, tested implementation of the
+unbiased site-finder that the standalone `05b_pocket_detection/` analysis validated by hand on
+OPLAH (`verify_ensemble_m4.py` checks it re-selects AMP's pocket). M1–M3 and M5–M8 are the
+scaffolding that lets it run end-to-end and agent-callable.
+
+M4 lets the tool work structure-free — and rather than trust any single site-finder, it
 lets the known modulator's own docking adjudicate among several proposers, which is why the
 status contract centers on it. (The liganded-homolog transplant is one proposer of several — the
 original method, now cross-checked instead of trusted blindly.) See
@@ -179,6 +184,10 @@ hits are more drug-like than AMP (median QED 0.75 vs 0.39). Full ranked table:
 [`../05b_pocket_detection/taskC/dock_5k/shortlist_5k.csv`](../05b_pocket_detection/taskC/dock_5k/shortlist_5k.csv).
 Docking ranks hypotheses, not measured affinities — every hit is a lead to test in an assay.
 
+> **Provenance.** These reference-case numbers come from the hand-run analysis in
+> `../05b_pocket_detection/` — the method applied to OPLAH — **not** from executing the packaged
+> M1–M8 on this target. Module **M4** below is that same site-finding step, generalized and tested.
+>
 > **This is the discovery result** (new hits). The section below is a *retrospective control* on
 > the method — a different question, don't conflate them.
 
