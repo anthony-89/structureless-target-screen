@@ -14,9 +14,9 @@
 > **5-oxoproline** then accumulates and drives the oxidative stress that damages the heart — a
 > murine HFpEF model ([van der Pol *et al.*, *Sci Transl Med* 2017](https://pubmed.ncbi.nlm.nih.gov/29118264/);
 > [van der Pol *et al.*, *Cardiovasc Res* 2018](https://academic.oup.com/cardiovascres/article-abstract/114/14/1871/5056075)).
-> So **activating** OPLAH is a therapeutic goal — and **5′-AMP**, found in a screen of 1,280
-> FDA-approved compounds ([*Eur Heart J* 2023](https://academic.oup.com/eurheartj/article/44/Supplement_2/ehad655.3130/7391542)),
-> is the activator identified so far.
+> So **activating** OPLAH is a therapeutic goal — and **5′-AMP** is the activator we identified
+> in **our own prior work**, from a screen of 1,280 FDA-approved compounds (Esquivel-Gaytan
+> *et al.*, [*Advanced Therapeutics* **9**(1):e00263, 2026](https://advanced.onlinelibrary.wiley.com/doi/10.1002/adtp.202500263)).
 >
 > **The question.** But OPLAH has **no solved 3D structure** and **no known binding site**, so a
 > better activator can't be designed. Where does AMP bind — and can we find molecules that mimic

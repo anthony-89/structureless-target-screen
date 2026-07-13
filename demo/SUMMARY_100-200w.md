@@ -3,8 +3,8 @@
 **OPLAH structure-to-screen: finding where a heart-failure target's activator binds — without pre-deciding the answer.**
 
 Heart failure represses the enzyme OPLAH, letting toxic 5-oxoproline accumulate and drive the
-oxidative stress that damages the heart. A screen of FDA-approved compounds found 5′-AMP
-reactivates OPLAH — but with no solved structure and no known binding site, a better activator
+oxidative stress that damages the heart. In our prior work, a screen of 1,280 FDA-approved compounds identified 5′-AMP as an OPLAH
+activator — but with no solved structure and no known binding site, a better activator
 can't be designed. Using Claude Code, we built a pipeline that turns a target plus one known
 modulator into a screen shortlist, and removes a hidden bias: the naive approach transplants a
 site from a homolog, pre-deciding where the ligand binds. Instead, we detect pockets unbiasedly
