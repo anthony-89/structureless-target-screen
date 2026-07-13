@@ -22,6 +22,7 @@ dependencies = [
 [project.optional-dependencies]
 dock = ["meeko>=0.6", "vina>=1.2"]
 mcp = ["mcp>=1.0"]
+test = ["pytest>=7"]
 
 [project.scripts]
 structure-to-screen = "structure_to_screen.cli:main"

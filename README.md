@@ -139,25 +139,39 @@ it was validated on.
 Everything runs from public data + open tools. No wet lab, no private assets.
 
 ```bash
-# 1. environment (conda/mamba)
-mamba env create -f 04_pipeline_code_and_docs/environment.yml   # or env below
-mamba install -n dock -c conda-forge openjdk=17                 # for P2Rank
+# 1. Environment — Vina, fpocket, RDKit, Meeko, Java (for P2Rank), all pinned. Run from repo root.
+mamba env create -f 04_pipeline_code_and_docs/environment.yml   # env: structure-to-screen
+mamba activate structure-to-screen
+
+# 1b. P2Rank — standalone Java tool for Task A (one-time download, ~275 MB)
+mkdir -p 05b_pocket_detection/tools
+curl -L https://github.com/rdk/p2rank/releases/download/2.5/p2rank_2.5.tar.gz \
+  | tar -xz -C 05b_pocket_detection/tools               # -> tools/p2rank_2.5/prank
+PRANK=05b_pocket_detection/tools/p2rank_2.5/prank
 
 # 2. Task A — unbiased pocket detection (full, untruncated model)
-prank predict -f 01_inputs/oplah_af.pdb -o 05b_pocket_detection/p2rank_out
-fpocket -f 01_inputs/oplah_af.pdb
-python 05b_pocket_detection/analyze_pockets.py        # -> pockets_p2rank.csv, comparison
+"$PRANK" predict -f 01_inputs/oplah_af.pdb -o 05b_pocket_detection/p2rank_out
+mkdir -p 05b_pocket_detection/fpocket_run && cp 01_inputs/oplah_af.pdb 05b_pocket_detection/fpocket_run/
+fpocket -f 05b_pocket_detection/fpocket_run/oplah_af.pdb     # optional cross-check (analyze runs without it)
+python 05b_pocket_detection/analyze_pockets.py              # -> pockets_p2rank.csv (+ fpocket if present)
 
 # 3. Task B — let AMP pick its site (blind + per-pocket dock)
-python 05b_pocket_detection/taskB/dock_pockets.py     # dock AMP into every pocket
+python 05b_pocket_detection/taskB/dock_pockets.py     # dock AMP into every detected pocket
 python 05b_pocket_detection/taskB/contacts.py         # AMP's contact residues
 
 # 4. Task C — screen libraries into AMP's pocket
-python 05b_pocket_detection/taskC/build_nucleotide_lib.py   # nucleotide arm
-python 05b_pocket_detection/taskC/prep_dock.py ...          # dock + rank
-# diverse ZINC arm — AMP-guided similarity+diversity funnel, docked locally with Vina:
+#   nucleotide arm (sanity check):
+python 05b_pocket_detection/taskC/build_nucleotide_lib.py
+python 05b_pocket_detection/taskC/prep_dock.py \
+    05b_pocket_detection/taskC/library/nucleotide_focused.csv \
+    05b_pocket_detection/taskC/nucleotide_run 8
+python 05b_pocket_detection/taskC/analyze_hits.py \
+    05b_pocket_detection/taskC/nucleotide_run \
+    05b_pocket_detection/taskC/library/nucleotide_focused.csv   # -> nucleotide_run/shortlist.csv
+#   diverse ZINC arm — AMP-guided similarity+diversity funnel, docked locally with Vina:
+python 05b_pocket_detection/taskC/prep_all.py               # prep all 50k -> ligs_50k/ (needed next)
 python 05b_pocket_detection/taskC/build_5k_selection.py     # pick 5,000 = 10% (ECFP4 + MaxMin)
-python 05b_pocket_detection/taskC/dock_5k.py                # local Vina dock (resumable)
+python 05b_pocket_detection/taskC/dock_5k.py                # local Vina dock (resumable, ~hours)
 python 05b_pocket_detection/taskC/analyze_5k.py             # rank + shortlist
 ```
 

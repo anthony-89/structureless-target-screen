@@ -47,45 +47,48 @@ with open(P2) as f:
         })
 
 # ---------- fpocket: parse druggability from info + centroid from pqr ----------
-fp_drug = {}
-cur = None
-for line in open(FP_INFO):
-    m = re.match(r"Pocket (\d+) :", line.strip())
-    if m:
-        cur = int(m.group(1)); continue
-    m = re.search(r"Druggability Score :\s*([\d.]+)", line)
-    if m and cur is not None:
-        fp_drug[cur] = float(m.group(1))
-
-# pqr: ATOM lines carry pocket id in the residue-sequence column (STP resname)
-fp_coords = {}
-for line in open(FP_PQR):
-    if line.startswith(("ATOM", "HETATM")) and "STP" in line:
-        # columns are whitespace-ish; use fixed slices robustly via split fallback
-        try:
-            x = float(line[30:38]); y = float(line[38:46]); z = float(line[46:54])
-            pid = int(line[22:26])
-        except ValueError:
-            parts = line.split()
-            x, y, z = float(parts[6]), float(parts[7]), float(parts[8])
-            pid = int(parts[5])
-        fp_coords.setdefault(pid, []).append((x, y, z))
-
+# fpocket output is regenerable and NOT shipped in the repo. If it is absent, Task A
+# still runs on P2Rank alone (the dominant, shipped result) instead of crashing.
 fp_pockets = []
-for pid, pts in sorted(fp_coords.items()):
-    cx = sum(p[0] for p in pts) / len(pts)
-    cy = sum(p[1] for p in pts) / len(pts)
-    cz = sum(p[2] for p in pts) / len(pts)
-    c = (cx, cy, cz)
-    fp_pockets.append({
-        "pocket": pid,
-        "drug_score": fp_drug.get(pid, float("nan")),
-        "n_spheres": len(pts),
-        "center": c,
-        "d_ATP": dist(c, ASSUMED["ATP_original_triphosphate"]),
-        "d_AMP": dist(c, ASSUMED["AMP_reanchored"]),
-        "d_p2rank1": dist(c, p2_pockets[0]["center"]),
-    })
+if FP_INFO.exists() and FP_PQR.exists():
+    fp_drug = {}
+    cur = None
+    for line in open(FP_INFO):
+        m = re.match(r"Pocket (\d+) :", line.strip())
+        if m:
+            cur = int(m.group(1)); continue
+        m = re.search(r"Druggability Score :\s*([\d.]+)", line)
+        if m and cur is not None:
+            fp_drug[cur] = float(m.group(1))
+
+    # pqr: ATOM lines carry pocket id in the residue-sequence column (STP resname)
+    fp_coords = {}
+    for line in open(FP_PQR):
+        if line.startswith(("ATOM", "HETATM")) and "STP" in line:
+            # columns are whitespace-ish; use fixed slices robustly via split fallback
+            try:
+                x = float(line[30:38]); y = float(line[38:46]); z = float(line[46:54])
+                pid = int(line[22:26])
+            except ValueError:
+                parts = line.split()
+                x, y, z = float(parts[6]), float(parts[7]), float(parts[8])
+                pid = int(parts[5])
+            fp_coords.setdefault(pid, []).append((x, y, z))
+
+    for pid, pts in sorted(fp_coords.items()):
+        cx = sum(p[0] for p in pts) / len(pts)
+        cy = sum(p[1] for p in pts) / len(pts)
+        cz = sum(p[2] for p in pts) / len(pts)
+        c = (cx, cy, cz)
+        fp_pockets.append({
+            "pocket": pid,
+            "drug_score": fp_drug.get(pid, float("nan")),
+            "n_spheres": len(pts),
+            "center": c,
+            "d_ATP": dist(c, ASSUMED["ATP_original_triphosphate"]),
+            "d_AMP": dist(c, ASSUMED["AMP_reanchored"]),
+            "d_p2rank1": dist(c, p2_pockets[0]["center"]),
+        })
 
 # ---------- write deliverable CSV (P2Rank ranked table) ----------
 with open(OUT / "pockets_p2rank.csv", "w", newline="") as f:
@@ -100,15 +103,16 @@ with open(OUT / "pockets_p2rank.csv", "w", newline="") as f:
                     "|".join(map(str, p["footprint_overlap"])),
                     " ".join(map(str, p["resnums"]))])
 
-with open(OUT / "pockets_fpocket.csv", "w", newline="") as f:
-    w = csv.writer(f)
-    w.writerow(["fpocket_id", "druggability", "n_alpha_spheres",
-                "center_x", "center_y", "center_z",
-                "dist_to_ATP_site", "dist_to_AMP_site", "dist_to_p2rank_pocket1"])
-    for p in sorted(fp_pockets, key=lambda x: -x["drug_score"]):
-        w.writerow([p["pocket"], f'{p["drug_score"]:.3f}', p["n_spheres"],
-                    f'{p["center"][0]:.2f}', f'{p["center"][1]:.2f}', f'{p["center"][2]:.2f}',
-                    f'{p["d_ATP"]:.1f}', f'{p["d_AMP"]:.1f}', f'{p["d_p2rank1"]:.1f}'])
+if fp_pockets:
+    with open(OUT / "pockets_fpocket.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["fpocket_id", "druggability", "n_alpha_spheres",
+                    "center_x", "center_y", "center_z",
+                    "dist_to_ATP_site", "dist_to_AMP_site", "dist_to_p2rank_pocket1"])
+        for p in sorted(fp_pockets, key=lambda x: -x["drug_score"]):
+            w.writerow([p["pocket"], f'{p["drug_score"]:.3f}', p["n_spheres"],
+                        f'{p["center"][0]:.2f}', f'{p["center"][1]:.2f}', f'{p["center"][2]:.2f}',
+                        f'{p["d_ATP"]:.1f}', f'{p["d_AMP"]:.1f}', f'{p["d_p2rank1"]:.1f}'])
 
 # ---------- console summary ----------
 print("=" * 78)
@@ -123,22 +127,25 @@ for p in p2_pockets[:8]:
           f'{p["d_ATP"]:>6.1f} {p["d_AMP"]:>6.1f}  {p["footprint_overlap"]}')
 
 print()
-print("=" * 78)
-print("fpocket — pockets sorted by druggability (cross-validation)")
-print("=" * 78)
-print(f'{"id":>3} {"drug":>6} {"nSph":>4} {"center (x,y,z)":>26} '
-      f'{"d_ATP":>6} {"d_AMP":>6} {"d_P2R1":>6}')
-for p in sorted(fp_pockets, key=lambda x: -x["drug_score"])[:8]:
-    c = p["center"]
-    print(f'{p["pocket"]:>3} {p["drug_score"]:>6.3f} {p["n_spheres"]:>4} '
-          f'({c[0]:>7.2f},{c[1]:>7.2f},{c[2]:>7.2f}) '
-          f'{p["d_ATP"]:>6.1f} {p["d_AMP"]:>6.1f} {p["d_p2rank1"]:>6.1f}')
-
-# nearest fpocket to P2Rank pocket1
-nearest = min(fp_pockets, key=lambda x: x["d_p2rank1"])
-print()
-print(f'Nearest fpocket to P2Rank pocket1: fpocket #{nearest["pocket"]} '
-      f'(drug={nearest["drug_score"]:.3f}), {nearest["d_p2rank1"]:.1f} A away')
+if fp_pockets:
+    print("=" * 78)
+    print("fpocket — pockets sorted by druggability (cross-validation)")
+    print("=" * 78)
+    print(f'{"id":>3} {"drug":>6} {"nSph":>4} {"center (x,y,z)":>26} '
+          f'{"d_ATP":>6} {"d_AMP":>6} {"d_P2R1":>6}')
+    for p in sorted(fp_pockets, key=lambda x: -x["drug_score"])[:8]:
+        c = p["center"]
+        print(f'{p["pocket"]:>3} {p["drug_score"]:>6.3f} {p["n_spheres"]:>4} '
+              f'({c[0]:>7.2f},{c[1]:>7.2f},{c[2]:>7.2f}) '
+              f'{p["d_ATP"]:>6.1f} {p["d_AMP"]:>6.1f} {p["d_p2rank1"]:>6.1f}')
+    # nearest fpocket to P2Rank pocket1
+    nearest = min(fp_pockets, key=lambda x: x["d_p2rank1"])
+    print()
+    print(f'Nearest fpocket to P2Rank pocket1: fpocket #{nearest["pocket"]} '
+          f'(drug={nearest["drug_score"]:.3f}), {nearest["d_p2rank1"]:.1f} A away')
+else:
+    print("fpocket output not found (05b_pocket_detection/fpocket_run/) — "
+          "skipping fpocket cross-check; run fpocket to enable it.")
 
 top = p2_pockets[0]
 print()

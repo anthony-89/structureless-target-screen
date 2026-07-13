@@ -9,6 +9,8 @@ dependencies:
   - rdkit=2025.9
   - openbabel=3.1
   - vina=1.2.7
+  - fpocket
+  - openjdk=17          # Java runtime for P2Rank (Task A)
   - numpy=1.26
   - pandas
   - scipy

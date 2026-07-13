@@ -48,6 +48,8 @@ Every module returns a machine-readable status an agent can branch on:
 | `unscreenable` | cannot produce a usable result (e.g. no liganded homolog) | short-circuit, agent told why |
 
 ## Quickstart
+> The installable package lives in `pipeline_src/` — run the commands in this README from there:
+> `cd 04_pipeline_code_and_docs/pipeline_src` first.
 ```bash
 pip install -e .
 python -m structure_to_screen \
@@ -70,7 +72,7 @@ cold-start path (no stubs), so a **brand-new** target with no cache runs from yo
 accession + modulator SMILES. M1–M5 and M8 have been exercised live; the M6 ChEMBL build
 and the packaged M7 screen wrapper are implemented and unit-tested but not yet run
 end-to-end on a fresh target through the package API (see the `verified` column in
-[`docs/IO_CONTRACT.md`](docs/IO_CONTRACT.md)) — treat a first cold-start screen as a run to
+[`docs/IO_CONTRACT.md`](pipeline_src/docs/IO_CONTRACT.md)) — treat a first cold-start screen as a run to
 watch, not fire-and-forget:
 ```bash
 pip install -e ".[dock]"          # RDKit + Meeko; also needs `vina` on PATH
@@ -82,7 +84,7 @@ M1/M2/M4 hit UniProt / AlphaFold DB / RCSB; M5 docks your modulator as the ancho
 builds a ChEMBL analog library (or drop your own `m6/candidate_library.csv`); M7 runs the
 Vina screen with per-ligand atomic checkpointing (kill it and re-run — it resumes). A CPU
 screen of ~1,000–1,500 ligands takes a few hours. See
-[`docs/IO_CONTRACT.md`](docs/IO_CONTRACT.md) for the per-module live/cached contract.
+[`docs/IO_CONTRACT.md`](pipeline_src/docs/IO_CONTRACT.md) for the per-module live/cached contract.
 
 **No big machine? Only M7 is compute-heavy** — M1–M6/M8 run on a laptop in minutes, so you
 run everything locally and offload just the screen. The docking step can also run on a free
@@ -95,9 +97,9 @@ the other cheapest-first options.
 PYTHONPATH=. python examples/demo.py
 ```
 Runs OPLAH/5-AMP (→ a `low_confidence` shortlist) and c-Myc/10058-F4 (→ a graceful
-`unscreenable` refusal) back-to-back. See [`docs/FAILURE_MODES.md`](docs/FAILURE_MODES.md)
+`unscreenable` refusal) back-to-back. See [`docs/FAILURE_MODES.md`](pipeline_src/docs/FAILURE_MODES.md)
 for the full catalogue of how each module degrades, and
-[`examples/STRESS_TEST_myc.md`](examples/STRESS_TEST_myc.md) for the stress-test writeup.
+[`examples/STRESS_TEST_myc.md`](pipeline_src/examples/STRESS_TEST_myc.md) for the stress-test writeup.
 
 ## Use it as an MCP server (agent-callable)
 ```bash
@@ -114,7 +116,7 @@ MCP client config:
     "structure-to-screen": {
       "command": "python", "args": ["-m", "structure_to_screen.mcp_server"] } } }
 ```
-Full tool reference: [`docs/MCP_TOOLS.md`](docs/MCP_TOOLS.md).
+Full tool reference: [`docs/MCP_TOOLS.md`](pipeline_src/docs/MCP_TOOLS.md).
 
 ## The method — how it works without a crystal structure
 The core problem: you have a target with **no experimental 3D structure** and **one known
@@ -136,8 +138,8 @@ M4 is what lets the tool work structure-free — and rather than trust any singl
 lets the known modulator's own docking adjudicate among several proposers, which is why the
 status contract centers on it. (The liganded-homolog transplant is one proposer of several — the
 original method, now cross-checked instead of trusted blindly.) See
-[`docs/IO_CONTRACT.md`](docs/IO_CONTRACT.md) for the full per-module contract and
-[`docs/FAILURE_MODES.md`](docs/FAILURE_MODES.md) for every degradation path.
+[`docs/IO_CONTRACT.md`](pipeline_src/docs/IO_CONTRACT.md) for the full per-module contract and
+[`docs/FAILURE_MODES.md`](pipeline_src/docs/FAILURE_MODES.md) for every degradation path.
 
 ## Installation
 ```bash
@@ -183,7 +185,7 @@ Docking ranks hypotheses, not measured affinities — every hit is a lead to tes
 ## Retrospective validation
 Does docking-alone, no tuning, recover the one experimentally-known modulator (5-AMP) out of
 a large library? Tested on **two independent libraries** — full detail in
-[`docs/VALIDATION.md`](docs/VALIDATION.md):
+[`docs/VALIDATION.md`](pipeline_src/docs/VALIDATION.md):
 
 - **Public ChEMBL library (1,431 approved drugs, fully reproducible):** 5-AMP ranks **3/14**
   among nucleoside/purine analogs (−8.36 kcal/mol), beaten only by two close analogs.
@@ -226,5 +228,5 @@ As long as a replacement returns `ok` / `low_confidence` / `unscreenable` with t
 keys, the status contract and the agent-facing MCP tools keep working unchanged.
 
 ## License
-MIT — see [`LICENSE`](LICENSE). Built open-source for the Built with Claude: Life Sciences
+MIT — see [`LICENSE`](../LICENSE). Built open-source for the Built with Claude: Life Sciences
 hackathon.
