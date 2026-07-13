@@ -42,6 +42,12 @@
 # --- Personal Claude Code local settings (permission allowlist; not for the public repo) ---
 .claude/settings.local.json
 
+# --- Vendored Claude Code skill (public Anthropic frontend-design skill; a build-time
+#     authoring aid for the demo pages, not part of the deliverable) ---
+.agents/
+.claude/skills/
+skills-lock.json
+
 # --- Scratch / logs / OS / Python ---
 __pycache__/
 *.pyc
