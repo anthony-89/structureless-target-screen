@@ -25,8 +25,13 @@
 # --- Repo snapshots (redundant with pipeline_src/) ---
 04_pipeline_code_and_docs/*.tar.gz
 
-# --- Superseded drafts (kept locally, NOT part of the submission) ---
-submission/_archive_claude_science/
+# --- Production scaffolding: kept LOCAL, never in the public repo ---
+#     (video script, submission plan, handoff logs, review notes, continue-here)
+#     These help produce/submit the project; nobody reproducing the work needs them,
+#     and some leak a private artifact URL. Public showcase assets live in demo/.
+/submission/
+/HANDOFF.md
+/HANDOFF_CLAUDE_SCIENCE.md
 
 # --- Regenerable P2Rank visualization bundle ---
 05b_pocket_detection/p2rank_out/visualizations/
