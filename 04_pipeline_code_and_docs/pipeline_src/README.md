@@ -63,10 +63,10 @@ screen of ~1,000–1,500 ligands takes a few hours. See
 [`docs/IO_CONTRACT.md`](docs/IO_CONTRACT.md) for the per-module live/cached contract.
 
 **No big machine? Only M7 is compute-heavy** — M1–M6/M8 run on a laptop in minutes, so you
-run everything locally and offload just the screen. There's a ready-to-run
-[`examples/colab_screen.ipynb`](examples/colab_screen.ipynb) that docks the library on a free
-Colab GPU (Uni-Dock) and hands the scores back for the pipeline to finish locally. See
-[`docs/COMPUTE.md`](docs/COMPUTE.md) for that and the other cheapest-first options.
+run everything locally and offload just the screen. The docking step can also run on a free
+cloud GPU (e.g. Google Colab or Kaggle) using the same box and scoring, with the scores handed
+back for the pipeline to finish locally. See [`docs/COMPUTE.md`](docs/COMPUTE.md) for the
+step-by-step and the other cheapest-first options.
 
 ## Demo — two targets, two honest outcomes
 ```bash

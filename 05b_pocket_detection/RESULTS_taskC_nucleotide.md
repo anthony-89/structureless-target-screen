@@ -1,7 +1,7 @@
 # Task C — nucleotide-focused arm (results)
 
 Answers **#3 (AMP mimics)** and **#4 (better binders)** from the chemistry we know fits.
-Diverse 50k arm runs separately on GPU (Colab notebook).
+The diverse ZINC arm (a 5,000-compound, AMP-guided subset) is docked separately, locally with AutoDock Vina — see `taskC/dock_5k/` and the root README.
 
 **Library:** 152 molecules — natural nucleotides/nucleosides + clinical nucleoside/nucleotide
 drugs + base analogs (PubChem canonical structures) + adenine-scaffold ChEMBL set.

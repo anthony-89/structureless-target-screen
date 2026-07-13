@@ -22,10 +22,9 @@ locally, offload only the screen.** Cheapest options first.
 - **Google Colab (free T4)** or **Kaggle (30 GPU-h/week free)**. Run M1–M6 locally, upload the
   prepared `receptor.pdbqt` + ligand PDBQTs, dock M7 on the GPU (minutes for ~1,500 ligands),
   pull the scores back, run M8 locally. No cost.
-- **Ready-to-run notebook: [`examples/colab_screen.ipynb`](../examples/colab_screen.ipynb)** —
-  a self-contained upload → GPU-dock (Uni-Dock) → download loop. Reads the same box M4 defines
-  and writes the same `.sc` score format the CPU path uses, so the results drop straight into
-  `m7/scores/` and the pipeline finishes locally.
+- The GPU dock uses the **same box M4 defines** and the same `.sc` score format as the CPU
+  path, so scores drop straight into `m7/scores/` and the pipeline finishes locally — no
+  special notebook required, just Uni-Dock (or Vina-GPU) on the uploaded inputs.
 
 ## Tier 2 — GPU docking engines (the real fix)
 Drop-in replacements for Vina using the **identical box and parameters**, 100×+ faster on one

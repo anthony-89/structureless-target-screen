@@ -4,6 +4,28 @@ Agent-callable pipeline that turns a **protein target with no experimental 3D st
 plus **one known small-molecule modulator** into a prioritized virtual-screen shortlist —
 orchestrating UniProt, AlphaFold DB, RCSB PDB, ChEMBL and AutoDock Vina.
 
+## What we did, why, and in what order
+
+The reference case: OPLAH has **no solved 3D structure** and no known binding site, but one
+molecule (**5-AMP**) is known to activate it. This pipeline goes from that single clue to a
+ranked list of new compounds to test. There are **three distinct stages** — keep them separate
+when reading the results:
+
+1. **Get a structure.** No experimental structure exists → use the AlphaFold model (1,288 aa).
+2. **Find WHERE the modulator binds — without pre-deciding it.** *(Site discovery — NOT a
+   compound screen.)* Detect pockets unbiasedly across the whole protein (P2Rank + fpocket),
+   then dock 5-AMP blind and let it choose its own site. Three independent methods converge on
+   one pocket (a `D-x-G-G-T` phosphate cleft; blind dock lands 2.2 Å away) → we trust the site.
+3. **Discovery screen — two arms, into that pocket.** *(This is the screen — it produces the
+   hits.)* **Arm 1 (nucleotide/analog):** sanity check — recovers AMP-like mimics (dGMP, cAMP,
+   plus approved antivirals entecavir & sofosbuvir). **Arm 2 (diverse ZINC, ~5,000 compounds,
+   run locally):** discover *new* chemistry — 775 out-score AMP, 379 genuinely novel; **top hit
+   ZINC4126706, −10.81 kcal/mol, Tanimoto to AMP 0.06.**
+4. **Validate the method retrospectively.** *(A control, NOT discovery — see "Retrospective
+   validation" below.)* Hide 5-AMP in a large library and check the pipeline re-finds it.
+
+> Docking ranks hypotheses, not measured affinities — every hit is a lead to test in an assay.
+
 **Modulator-agnostic.** The pipeline works identically whether your known active is an
 inhibitor, an activator, or a mechanism-unknown binder — you anchor the screen on whatever
 molecule you have. It was *motivated* by the harder, less-served case (**enhancers /
@@ -63,10 +85,10 @@ screen of ~1,000–1,500 ligands takes a few hours. See
 [`docs/IO_CONTRACT.md`](docs/IO_CONTRACT.md) for the per-module live/cached contract.
 
 **No big machine? Only M7 is compute-heavy** — M1–M6/M8 run on a laptop in minutes, so you
-run everything locally and offload just the screen. There's a ready-to-run
-[`examples/colab_screen.ipynb`](examples/colab_screen.ipynb) that docks the library on a free
-Colab GPU (Uni-Dock) and hands the scores back for the pipeline to finish locally. See
-[`docs/COMPUTE.md`](docs/COMPUTE.md) for that and the other cheapest-first options.
+run everything locally and offload just the screen. The docking step can also run on a free
+cloud GPU (e.g. Google Colab or Kaggle) using the same box and scoring, with the scores handed
+back for the pipeline to finish locally. See [`COMPUTE.md`](COMPUTE.md) for the step-by-step and
+the other cheapest-first options.
 
 ## Demo — two targets, two honest outcomes
 ```bash
@@ -140,6 +162,23 @@ python examples/test_degradation.py    # the no-homolog graceful-degradation pat
 Both reference runs ship as cached module outputs under `examples/`, so every claim in the
 docs is reproducible offline; a fresh live run reproduces the OPLAH homolog proposer's transplant
 at 1.52 Å RMSD (7HK7/ANP) — one of the several proposers M4's ensemble adjudicates between.
+
+## Results — discovery screen (two arms)
+The screen docks candidates **into the AMP-chosen pocket** (stage 3 above). Two arms, two jobs:
+
+| Arm | Purpose | Representative hits (Vina, kcal/mol) |
+|-----|---------|--------------------------------------|
+| Nucleotide / analog | sanity check — recover AMP-like mimics | dGMP −9.14 · cAMP −9.25 · entecavir (HBV drug) · sofosbuvir (HCV drug) |
+| Diverse ZINC (~5,000) | discover *novel* chemistry | **ZINC4126706 −10.81** (novel, Tanimoto to AMP 0.06) |
+
+Diverse arm: 4,998 usable of 4,999 docked (local Vina); AMP control *in this box* −8.78.
+**775 beat AMP** → 396 enrichment-arm + **379 genuinely novel** diversity-arm scaffolds, and the
+hits are more drug-like than AMP (median QED 0.75 vs 0.39). Full ranked table:
+[`../05b_pocket_detection/taskC/dock_5k/shortlist_5k.csv`](../05b_pocket_detection/taskC/dock_5k/shortlist_5k.csv).
+Docking ranks hypotheses, not measured affinities — every hit is a lead to test in an assay.
+
+> **This is the discovery result** (new hits). The section below is a *retrospective control* on
+> the method — a different question, don't conflate them.
 
 ## Retrospective validation
 Does docking-alone, no tuning, recover the one experimentally-known modulator (5-AMP) out of

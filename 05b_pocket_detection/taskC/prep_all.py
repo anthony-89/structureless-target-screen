@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Prep ALL 50k ligands to pdbqt on the Mac (8 cores), so Colab only GPU-docks.
-Writes ligs_50k/<lig_id>.pdbqt and a zip bundle for upload."""
+"""Prep ALL 50k ligands to pdbqt (8 cores). These feed the local Vina screen
+(build_5k_selection.py picks a subset; dock_5k.py docks it locally).
+Writes ligs_50k/<lig_id>.pdbqt (plus an optional zip bundle for GPU offload)."""
 import os, csv, time, zipfile
 from multiprocessing import Pool
 from pathlib import Path
