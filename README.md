@@ -57,8 +57,40 @@ AlphaFold model
   → shortlist                AMP-mimics (#3)  +  novel better binders (#4)
 ```
 
-Hand it **any** structureless target + one known modulator and it runs the same way. The
-site-finder folds back into pipeline module **M4**, replacing the homolog-transplant step.
+Hand it **any** structureless target + one known modulator and it runs the same way — that's
+what the packaged pipeline in `04_pipeline_code_and_docs/` is for. The unbiased site-finder
+above becomes its module **M4**.
+
+---
+
+## How the two fit together
+
+This repo has **two entry points that share one idea** — not two separate projects:
+
+```
+            one idea: don't trust a single site-finder —
+       let the known modulator pick its own pocket by docking
+                   /                             \
+  THE FINDING                            THE TOOL
+  05b_pocket_detection/                  04_…/structure_to_screen/
+  done by hand on OPLAH                  the same idea, packaged as M1–M8
+  → reproduces the science below         → run it on your own target
+```
+
+- **`05b_pocket_detection/` — the finding.** The OPLAH study behind every number in this
+  README: unbiased detection → AMP picks its site → two-arm screen. Reproduce it with the
+  [commands below](#reproduce-it).
+- **`04_pipeline_code_and_docs/` — the tool.** The same method packaged as an agent-callable
+  pipeline (M1 intake → M2 QC → M3 receptor → **M4 site** → M5 validate → M6 library →
+  M7 screen → M8 prioritize), each step returning `ok` / `low_confidence` / `unscreenable`.
+  Point it at a UniProt id + a modulator SMILES and it runs end-to-end, and it exposes an
+  **MCP server** so an agent (Claude) can drive it. See
+  [`04_pipeline_code_and_docs/README.md`](04_pipeline_code_and_docs/README.md).
+
+**The join is M4.** What `05b` did by hand — geometric/ML pocket detection, then the modulator
+choosing its site by docking — is exactly what **M4** automates, as a modulator-adjudicated
+ensemble of proposers (homolog transplant · fpocket · blind dock). OPLAH is the first target
+it was validated on.
 
 ---
 
